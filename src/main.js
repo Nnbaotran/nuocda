@@ -20,13 +20,16 @@ function navigate() {
   }
   const routes = routesFor(profile.role);
   if (!shell) shell = renderShell(app, routes);
-  const route = findRoute(currentPath(), profile.role) ?? findRoute('/', profile.role);
-  if (currentPath() !== route.path) history.replaceState(null, '', `#${route.path}`);
+  let route = findRoute(currentPath(), profile.role);
+  if (!route) {
+    route = findRoute('/', profile.role);
+    history.replaceState(null, '', '#/');
+  }
   shell.setActive(route);
   shell.page.classList.remove('fade-in');
   void shell.page.offsetWidth; // khởi động lại hiệu ứng xuất hiện
   shell.page.classList.add('fade-in');
-  route.render(shell.page, { routes });
+  route.render(shell.page, { routes, params: route.params });
   window.scrollTo({ top: 0 });
 }
 
