@@ -12,6 +12,8 @@ const ICON_PATHS = {
   calendar: 'M3 6h18v15H3zM3 10h18M8 3v4M16 3v4',
   wallet: 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13h2',
   chart: 'M3 3v18h18M7 15l4-4 3 3 5-6',
+  sun: 'M12 4V2M12 22v-2M4.9 4.9 3.5 3.5M20.5 20.5l-1.4-1.4M4 12H2M22 12h-2M4.9 19.1l-1.4 1.4M20.5 3.5l-1.4 1.4M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z',
+  moon: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z',
   cash: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6.5 9.5h.01M17.5 14.5h.01',
   key: 'M15 7a4 4 0 1 1-3.9 5H3v3h3v3h3v-3h2.1A4 4 0 0 1 15 7zM16 10h.01',
   menu: 'M4 6h16M4 12h16M4 18h16',
@@ -31,6 +33,14 @@ export function icon(name, cls = 'size-5') {
   return raw(
     `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICON_PATHS[name] ?? ''}"/></svg>`,
   );
+}
+
+/** Nút chuyển sáng/tối (bộ điều khiển ở lib/theme.js bắt mọi nút có data-theme-toggle). */
+export function themeToggle({ withLabel = false, cls = '' } = {}) {
+  return html`<button type="button" class="${withLabel ? 'nav-link w-full' : 'btn-icon'} ${cls}" data-theme-toggle aria-label="Đổi chế độ sáng/tối">
+    <span class="dark:hidden">${icon('moon')}</span><span class="hidden dark:inline">${icon('sun')}</span>
+    ${withLabel ? html`<span data-theme-label>Chế độ tối</span>` : ''}
+  </button>`;
 }
 
 // ---- Thông báo nhỏ (toast) --------------------------------------------
@@ -58,13 +68,13 @@ export function openModal({ title, body, submitLabel = 'Lưu', onSubmit, danger 
   const el = toNode(html`
     <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="${title}">
       ${raw(onSubmit ? '<form' : '<div')} class="modal-panel ${wide ? 'md:max-w-2xl' : ''}" novalidate>
-        <header class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-          <h2 class="text-lg font-semibold text-white">${title}</h2>
+        <header class="flex items-center justify-between gap-3 border-b border-fg/10 px-5 py-4">
+          <h2 class="text-lg font-semibold text-fg">${title}</h2>
           <button type="button" class="btn-icon" data-close aria-label="Đóng">${icon('x')}</button>
         </header>
         <div class="max-h-[70dvh] overflow-y-auto px-5 py-4">${body}</div>
         <p class="form-error mx-5 hidden" data-form-error></p>
-        <footer class="flex gap-3 border-t border-white/10 px-5 py-4">
+        <footer class="flex gap-3 border-t border-fg/10 px-5 py-4">
           <button type="button" class="btn-secondary flex-1" data-close>Huỷ</button>
           ${onSubmit ? html`<button type="submit" class="${danger ? 'btn-danger' : 'btn-primary'} flex-1" data-submit>${submitLabel}</button>` : ''}
         </footer>
@@ -123,7 +133,7 @@ export function confirmDialog({ title = 'Xác nhận', message, confirmLabel = '
     let answered = false;
     const { el } = openModal({
       title,
-      body: html`<p class="text-slate-300">${message}</p>`,
+      body: html`<p class="text-fg-2">${message}</p>`,
       submitLabel: confirmLabel,
       danger,
       onSubmit: () => {
@@ -149,7 +159,7 @@ export function promptReason({ title, message, confirmLabel = 'Đồng ý', plac
       danger: true,
       submitLabel: confirmLabel,
       body: html`<div class="space-y-3">
-        <p class="text-slate-300">${message}</p>
+        <p class="text-fg-2">${message}</p>
         <input class="input" name="reason" maxlength="300" placeholder="${placeholder}" />
       </div>`,
       onSubmit: (form) => {
@@ -175,8 +185,8 @@ export function loadingState(rows = 3) {
 
 export function emptyState(message, actionHtml = '') {
   return html`<div class="card flex flex-col items-center gap-3 py-12 text-center">
-    <div class="grid size-12 place-items-center rounded-2xl bg-white/5 text-slate-400">${icon('box', 'size-6')}</div>
-    <p class="text-slate-400">${message}</p>
+    <div class="grid size-12 place-items-center rounded-2xl bg-fg/5 text-muted">${icon('box', 'size-6')}</div>
+    <p class="text-muted">${message}</p>
     ${actionHtml}
   </div>`;
 }
@@ -185,8 +195,8 @@ export function errorState(message, onRetry) {
   const id = `retry-${Math.random().toString(36).slice(2)}`;
   queueMicrotask(() => document.getElementById(id)?.addEventListener('click', onRetry));
   return html`<div class="card flex flex-col items-center gap-3 border-rose-500/30 py-10 text-center">
-    <div class="grid size-12 place-items-center rounded-2xl bg-rose-500/10 text-rose-400">${icon('alert', 'size-6')}</div>
-    <p class="text-rose-200">${message}</p>
+    <div class="grid size-12 place-items-center rounded-2xl bg-rose-500/10 text-bad">${icon('alert', 'size-6')}</div>
+    <p class="text-bad">${message}</p>
     ${onRetry ? html`<button id="${id}" class="btn-secondary">${icon('refresh', 'size-4')} Thử lại</button>` : ''}
   </div>`;
 }
