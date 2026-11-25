@@ -21,7 +21,7 @@ export function renderShell(root, routes) {
     html`<div class="min-h-dvh md:pl-64">
       <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-fg/10 bg-surface/80 backdrop-blur md:flex">
         <div class="flex h-16 items-center gap-3 px-5">
-          <img src="/assets/favicon.svg" alt="" class="size-9" />
+          <img src="/assets/logo.svg" alt="" class="size-9" />
           <span class="gradient-text text-lg font-bold">${APP_NAME}</span>
         </div>
         <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="Menu chính">${navLinks(routes)}</nav>
@@ -37,7 +37,7 @@ export function renderShell(root, routes) {
 
       <header class="sticky top-0 z-20 border-b border-fg/10 bg-page/80 backdrop-blur-md">
         <div class="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4 md:h-16 md:px-6">
-          <img src="/assets/favicon.svg" alt="" class="size-8 md:hidden" />
+          <img src="/assets/logo.svg" alt="" class="size-8 md:hidden" />
           <h1 class="min-w-0 flex-1 truncate font-semibold text-fg" data-page-title>${APP_NAME}</h1>
           <span class="gradient-text hidden text-sm font-semibold sm:inline md:hidden">${APP_NAME}</span>
           ${themeToggle()}

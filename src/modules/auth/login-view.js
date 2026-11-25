@@ -10,7 +10,7 @@ export function renderLogin(root, { notice } = {}) {
       <div class="absolute top-3 right-3">${themeToggle()}</div>
       <div class="fade-in w-full max-w-sm">
         <div class="mb-8 text-center">
-          <img src="/assets/favicon.svg" alt="" class="mx-auto mb-4 size-16 drop-shadow-[0_0_24px_rgba(239,60,77,0.35)]" />
+          <img src="/assets/logo.svg" alt="" class="mx-auto mb-4 size-16 drop-shadow-[0_8px_24px_rgba(56,189,248,0.35)]" />
           <h1 class="gradient-text text-3xl font-bold tracking-tight">${APP_NAME}</h1>
           <p class="mt-2 text-sm text-muted">Đăng nhập để tiếp tục</p>
         </div>
