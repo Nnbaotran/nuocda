@@ -56,7 +56,7 @@ export function toast(message, type = 'success') {
 export function openModal({ title, body, submitLabel = 'Lưu', onSubmit, danger = false, wide = false }) {
   const el = toNode(html`
     <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="${title}">
-      <form class="modal-panel ${wide ? 'md:max-w-2xl' : ''}" novalidate>
+      ${raw(onSubmit ? '<form' : '<div')} class="modal-panel ${wide ? 'md:max-w-2xl' : ''}" novalidate>
         <header class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
           <h2 class="text-lg font-semibold text-white">${title}</h2>
           <button type="button" class="btn-icon" data-close aria-label="Đóng">${icon('x')}</button>
@@ -67,9 +67,10 @@ export function openModal({ title, body, submitLabel = 'Lưu', onSubmit, danger 
           <button type="button" class="btn-secondary flex-1" data-close>Huỷ</button>
           ${onSubmit ? html`<button type="submit" class="${danger ? 'btn-danger' : 'btn-primary'} flex-1" data-submit>${submitLabel}</button>` : ''}
         </footer>
-      </form>
+      ${raw(onSubmit ? '</form>' : '</div>')}
     </div>`);
-  const form = $('form', el);
+  // Hộp thoại không có nút Lưu thì không bọc <form>, để bên trong chứa được form khác.
+  const form = $('.modal-panel', el);
   const errBox = $('[data-form-error]', el);
   const prevFocus = document.activeElement;
 
@@ -85,9 +86,8 @@ export function openModal({ title, body, submitLabel = 'Lưu', onSubmit, danger 
     if (e.target === el || e.target.closest('[data-close]')) close();
   });
 
-  form.addEventListener('submit', async (e) => {
+  if (onSubmit) form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!onSubmit) return close();
     const btn = $('[data-submit]', el);
     errBox.classList.add('hidden');
     btn.disabled = true;
@@ -134,6 +134,32 @@ export function confirmDialog({ title = 'Xác nhận', message, confirmLabel = '
       if (!el.isConnected) {
         obs.disconnect();
         if (!answered) resolve(false);
+      }
+    }).observe(document.body, { childList: true });
+  });
+}
+
+/** Hỏi xác nhận kèm ô nhập lý do. Trả về Promise<string|null> (null = bấm Huỷ). */
+export function promptReason({ title, message, confirmLabel = 'Đồng ý', placeholder = 'Lý do (không bắt buộc)' }) {
+  return new Promise((resolve) => {
+    let answered = false;
+    const { el } = openModal({
+      title,
+      danger: true,
+      submitLabel: confirmLabel,
+      body: html`<div class="space-y-3">
+        <p class="text-slate-300">${message}</p>
+        <input class="input" name="reason" maxlength="300" placeholder="${placeholder}" />
+      </div>`,
+      onSubmit: (form) => {
+        answered = true;
+        resolve(form.elements.reason.value.trim());
+      },
+    });
+    new MutationObserver((_, obs) => {
+      if (!el.isConnected) {
+        obs.disconnect();
+        if (!answered) resolve(null);
       }
     }).observe(document.body, { childList: true });
   });
