@@ -5,17 +5,20 @@ import { listProducts } from '../products/api.js';
 import { deleteCustomer, getCustomer, getCustomerPrices, saveCustomerPrices, updateCustomer } from './api.js';
 import { openEditCustomer } from './forms.js';
 import { buildPriceRows, diffPrices } from './logic.js';
+import { renderDebtTab } from './debt-tab.js';
 import { bindPriceTable, priceTable, readPriceEdits, showPriceErrors } from './price-table.js';
+import { renderSalesTab } from './sales-tab.js';
 
+// id thẻ cũng là phần cuối địa chỉ: #/khach-hang/<mã>/ban-hang
 const TABS = [
-  { id: 'prices', label: 'Giá bán' },
-  { id: 'sales', label: 'Bán hàng' },
-  { id: 'debt', label: 'Công nợ' },
+  { id: 'gia-ban', label: 'Giá bán' },
+  { id: 'ban-hang', label: 'Bán hàng' },
+  { id: 'cong-no', label: 'Công nợ' },
 ];
 
 export function renderCustomerDetail(root, { params }) {
   const id = params.id;
-  const state = { customer: null, rows: [], tab: 'prices', dirty: 0 };
+  const state = { customer: null, rows: [], tab: TABS.some((t) => t.id === params.tab) ? params.tab : 'gia-ban', dirty: 0 };
 
   setHtml(root, html`<section class="space-y-4">
     <a href="#/khach-hang" class="inline-flex min-h-11 items-center gap-1 text-sm text-slate-400 hover:text-white">‹ Danh sách khách</a>
@@ -60,7 +63,7 @@ export function renderCustomerDetail(root, { params }) {
   }
 
   function tabPanel() {
-    if (state.tab === 'prices') {
+    if (state.tab === 'gia-ban') {
       return html`<div class="space-y-3">
         <p class="text-sm text-slate-400">Giá riêng của khách này. Đổi ở đây không ảnh hưởng khách khác hay giá chung.</p>
         <div data-prices>${priceTable(state.rows, { editable: true })}</div>
@@ -73,11 +76,7 @@ export function renderCustomerDetail(root, { params }) {
         </div>
       </div>`;
     }
-    const tab = TABS.find((t) => t.id === state.tab);
-    return html`<div class="card flex flex-col items-center gap-2 py-12 text-center">
-      <p class="font-semibold text-white">${tab.label}</p>
-      <p class="max-w-xs text-sm text-slate-400">Phần này sẽ có ở giai đoạn 3 (Đơn hàng + công nợ).</p>
-    </div>`;
+    return ''; // thẻ Bán hàng / Công nợ được vẽ sau (xem draw)
   }
 
   function draw() {
@@ -89,7 +88,10 @@ export function renderCustomerDetail(root, { params }) {
       </div>
       <div class="fade-in" role="tabpanel" data-panel>${tabPanel()}</div>
     </div>`);
-    if (state.tab === 'prices') bindPrices();
+    const panel = $('[data-panel]', body);
+    if (state.tab === 'gia-ban') bindPrices();
+    else if (state.tab === 'ban-hang') renderSalesTab(panel, { customer: c, priceRows: state.rows });
+    else renderDebtTab(panel, { customer: c });
   }
 
   function bindPrices() {
@@ -136,6 +138,7 @@ export function renderCustomerDetail(root, { params }) {
       if (!(await leaveDirtyOk())) return;
       state.tab = b.dataset.tab;
       state.dirty = 0;
+      history.replaceState(null, '', `#/khach-hang/${id}/${state.tab}`);
       draw();
     } else if (b.matches('[data-edit]')) {
       openEditCustomer(c, load);

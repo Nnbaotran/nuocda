@@ -1,0 +1,181 @@
+// Thẻ "Công nợ": nợ đầu kỳ, phát sinh tăng (đơn ghi nợ), phát sinh giảm (khách trả), nợ cuối kỳ
+// theo khoảng ngày; ghi nhận khách trả nợ; huỷ phiếu thu nhập nhầm.
+import { formatDateStr, todayVN } from '../../lib/dates.js';
+import { $, html, setHtml } from '../../lib/dom.js';
+import { formatVND, groupThousands } from '../../lib/format.js';
+import { mountRangeFilter } from '../../lib/range-filter.js';
+import { bindMoneyInputs, emptyState, errorState, icon, loadingState, moneyValue, openModal, promptReason, showFieldErrors, toast } from '../../lib/ui.js';
+import { cancelPayment, customerBalances, customerLedger, recordPayment } from '../orders/api.js';
+import { balanceLabel, buildLedger } from '../orders/logic.js';
+
+const TONE = { debt: 'text-amber-300', credit: 'text-emerald-300', clear: 'text-emerald-300' };
+
+export function renderDebtTab(panel, { customer }) {
+  let range = null;
+  let balance = 0;
+
+  setHtml(
+    panel,
+    html`<div class="space-y-4">
+      <div class="card flex flex-wrap items-center gap-3">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-slate-400">Công nợ hiện tại</p>
+          <p class="text-2xl font-bold tabular-nums" data-balance>…</p>
+        </div>
+        <button class="btn-primary" data-pay>${icon('wallet', 'size-4')} Khách trả nợ</button>
+      </div>
+      <div data-range></div>
+      <div data-ledger>${loadingState(3)}</div>
+    </div>`,
+  );
+  const ledgerEl = $('[data-ledger]', panel);
+
+  async function loadBalance() {
+    try {
+      balance = (await customerBalances()).get(customer.id) ?? 0;
+      const l = balanceLabel(balance);
+      const el = $('[data-balance]', panel);
+      el.textContent = l.text;
+      el.className = `text-2xl font-bold tabular-nums ${TONE[l.tone]}`;
+    } catch {
+      /* phần sổ bên dưới sẽ báo lỗi */
+    }
+  }
+
+  async function loadLedger() {
+    setHtml(ledgerEl, loadingState(3));
+    try {
+      const data = await customerLedger(customer.id, range.from, range.to);
+      drawLedger(buildLedger(data.opening, data.entries));
+    } catch (err) {
+      setHtml(ledgerEl, errorState(err.message, loadLedger));
+    }
+  }
+
+  function card(label, value, cls = 'text-white') {
+    return html`<div class="card p-3">
+      <p class="text-xs text-slate-400">${label}</p>
+      <p class="mt-1 text-lg font-bold tabular-nums ${cls}">${value}</p>
+    </div>`;
+  }
+
+  function drawLedger(l) {
+    const money = (n) => (n < 0 ? `−${formatVND(-n)}` : formatVND(n));
+    setHtml(
+      ledgerEl,
+      html`<div class="space-y-4">
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+          ${card('Nợ đầu kỳ', money(l.opening))}
+          ${card('Phát sinh tăng', `+${formatVND(l.increase)}`, 'text-amber-300')}
+          ${card('Phát sinh giảm', `−${formatVND(l.decrease)}`, 'text-emerald-300')}
+          ${card('Nợ cuối kỳ', money(l.closing), 'gradient-text')}
+        </div>
+        ${l.rows.length === 0
+          ? emptyState('Không có phát sinh trong khoảng ngày này')
+          : html`<ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+              ${l.rows.map(
+                (r) => html`<li class="flex items-start gap-3 px-4 py-3">
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs text-slate-500">${formatDateStr(r.date)}</p>
+                    ${r.kind === 'order'
+                      ? html`<p class="font-medium text-white">Đơn <a class="text-cyan-300 hover:underline" href="#/don-hang/${r.id}">${r.code}</a></p>
+                          <p class="text-xs text-slate-500">Tổng ${formatVND(r.total)} · đã trả ${formatVND(r.paid)}</p>`
+                      : html`<p class="font-medium text-white">Khách trả nợ</p>
+                          ${r.note ? html`<p class="text-xs text-slate-500">${r.note}</p>` : ''}`}
+                  </div>
+                  <div class="text-right">
+                    <p class="font-semibold tabular-nums ${r.increase ? 'text-amber-300' : 'text-emerald-300'}">
+                      ${r.increase ? `+${formatVND(r.increase)}` : `−${formatVND(r.decrease)}`}
+                    </p>
+                    <p class="text-xs text-slate-500 tabular-nums">Dư: ${money(r.balance)}</p>
+                    ${r.kind === 'payment' ? html`<button class="mt-1 text-xs text-rose-300 hover:underline" data-cancel-pay="${r.id}" data-amount="${r.decrease}">Huỷ phiếu</button>` : ''}
+                  </div>
+                </li>`,
+              )}
+            </ul>`}
+      </div>`,
+    );
+  }
+
+  function openPayment() {
+    const today = todayVN();
+    const { el } = openModal({
+      title: 'Ghi nhận khách trả nợ',
+      submitLabel: 'Lưu',
+      body: html`<div class="space-y-4">
+        <p class="text-sm text-slate-400">${customer.name} – ${balanceLabel(balance).text}</p>
+        <div>
+          <label class="field-label" for="pay-amount">Số tiền trả (₫) *</label>
+          <div class="flex gap-2">
+            <input class="input flex-1 text-right text-lg font-semibold tabular-nums" id="pay-amount" name="amount" data-money inputmode="numeric" required />
+            ${balance > 0 ? html`<button type="button" class="btn-secondary" data-all>Trả hết</button>` : ''}
+          </div>
+          <p class="field-error hidden" data-error-for="amount"></p>
+        </div>
+        <div>
+          <label class="field-label" for="pay-date">Ngày trả</label>
+          <input class="input" id="pay-date" name="paidOn" type="date" value="${today}" max="${today}" />
+          <p class="field-error hidden" data-error-for="paidOn"></p>
+        </div>
+        <div>
+          <label class="field-label" for="pay-note">Ghi chú</label>
+          <input class="input" id="pay-note" name="note" maxlength="300" placeholder="VD: chuyển khoản, tiền mặt…" />
+        </div>
+      </div>`,
+      onSubmit: async (form) => {
+        const amount = moneyValue(form.elements.amount);
+        const paidOn = form.elements.paidOn.value;
+        const errors = {};
+        if (!amount || amount <= 0) errors.amount = 'Nhập số tiền lớn hơn 0';
+        else if (amount > balance) errors.amount = `Lớn hơn số nợ hiện tại (${formatVND(Math.max(balance, 0))})`;
+        if (!paidOn || paidOn > today) errors.paidOn = 'Chọn ngày, không được ở tương lai';
+        showFieldErrors(form, errors);
+        if (Object.keys(errors).length) return false;
+        await recordPayment({ customerId: customer.id, amount, paidOn, note: form.elements.note.value.trim() });
+        toast(`Đã ghi nhận khách trả ${formatVND(amount)}`);
+        refreshAll();
+      },
+    });
+    bindMoneyInputs(el);
+    el.querySelector('[data-all]')?.addEventListener('click', () => {
+      el.querySelector('[name=amount]').value = groupThousands(balance);
+    });
+  }
+
+  async function onCancelPayment(id, amount) {
+    const reason = await promptReason({
+      title: 'Huỷ phiếu thu',
+      message: `Huỷ khoản khách trả ${formatVND(amount)}? Số này sẽ được cộng lại vào công nợ của khách.`,
+      confirmLabel: 'Huỷ phiếu thu',
+    });
+    if (reason === null) return;
+    try {
+      await cancelPayment(id, reason);
+      toast('Đã huỷ phiếu thu');
+      refreshAll();
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  }
+
+  function refreshAll() {
+    loadBalance();
+    loadLedger();
+  }
+
+  panel.addEventListener('click', (e) => {
+    if (e.target.closest('[data-pay]')) openPayment();
+    const c = e.target.closest('[data-cancel-pay]');
+    if (c) onCancelPayment(c.dataset.cancelPay, Number(c.dataset.amount));
+  });
+
+  const filter = mountRangeFilter($('[data-range]', panel), {
+    initial: 'month',
+    onChange: (r) => {
+      range = r;
+      loadLedger();
+    },
+  });
+  range = filter.get();
+  refreshAll();
+}
