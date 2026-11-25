@@ -89,7 +89,7 @@ export function renderShell(root, routes) {
       $('[data-page-title]', root).textContent = route.label;
       document.title = `${route.label} – ${APP_NAME}`;
       $$('[data-path]', root).forEach((a) => {
-        if (a.dataset.path === route.path) a.setAttribute('aria-current', 'page');
+        if (a.dataset.path === route.navPath) a.setAttribute('aria-current', 'page');
         else a.removeAttribute('aria-current');
       });
     },
