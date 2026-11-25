@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@source "../index.html";
+@source "./";
+
+/* Bảng màu thương hiệu: navy đậm + gradient xanh dương – cyan – tím */
+@theme {
+  --color-ink-950: #050816;
+  --color-ink-900: #0a1024;
+  --color-ink-850: #0e1630;
+  --color-ink-800: #131d3b;
+  --color-ink-700: #1c2950;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply min-h-dvh bg-ink-950 font-sans text-slate-200 antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 110% -10%, rgb(124 58 237 / 0.14), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 0%, rgb(14 165 233 / 0.12), transparent 60%);
+    background-attachment: fixed;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-cyan-400;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-sky-400 via-cyan-300 to-violet-400 bg-clip-text text-transparent;
+  }
+  .card {
+    @apply rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur-sm;
+  }
+  .card-hover {
+    @apply transition duration-200 hover:border-cyan-400/30 hover:shadow-cyan-500/10;
+  }
+
+  /* Nút: cao tối thiểu 44px để dễ chạm trên điện thoại */
+  .btn, .btn-primary, .btn-secondary, .btn-danger {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition duration-150 select-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-sky-500 via-cyan-500 to-violet-500 text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 active:scale-[0.98];
+  }
+  .btn-danger {
+    @apply bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.98];
+  }
+  .btn-icon {
+    @apply inline-grid size-11 place-items-center rounded-xl text-slate-400 transition hover:bg-white/10 hover:text-white;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-slate-300;
+  }
+  .input {
+    @apply block min-h-11 w-full rounded-xl border border-white/10 bg-ink-850 px-3.5 text-base text-white placeholder:text-slate-500 transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none aria-[invalid=true]:border-rose-500/70;
+  }
+  textarea.input {
+    @apply py-2.5;
+  }
+  .field-error {
+    @apply mt-1 text-sm text-rose-400;
+  }
+  .form-error {
+    @apply rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200;
+  }
+
+  .badge, .badge-green, .badge-gray, .badge-violet, .badge-cyan {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-green {
+    @apply bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30;
+  }
+  .badge-gray {
+    @apply bg-slate-500/15 text-slate-400 ring-1 ring-slate-500/30;
+  }
+  .badge-violet {
+    @apply bg-violet-500/15 text-violet-300 ring-1 ring-violet-500/30;
+  }
+  .badge-cyan {
+    @apply bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/30;
+  }
+
+  .table-wrap {
+    @apply overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70;
+  }
+  .table {
+    @apply w-full text-left text-sm;
+  }
+  .table th {
+    @apply bg-white/[0.03] px-4 py-3 text-xs font-semibold tracking-wide text-slate-400 uppercase;
+  }
+  .table td {
+    @apply border-t border-white/5 px-4 py-3 align-middle;
+  }
+  .table tbody tr {
+    @apply transition hover:bg-white/[0.03];
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-2xl bg-white/5;
+  }
+
+  /* Điều hướng */
+  .nav-link {
+    @apply flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-gradient-to-r from-sky-500/20 to-violet-500/10 text-white ring-1 ring-cyan-400/30;
+  }
+  .bottom-link {
+    @apply flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-slate-500 transition;
+  }
+  .bottom-link[aria-current="page"] {
+    @apply text-cyan-300;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-150 md:items-center md:p-4;
+  }
+  .modal-panel {
+    @apply w-full rounded-t-3xl border border-white/10 bg-ink-900 shadow-2xl shadow-black/50 md:max-w-lg md:rounded-3xl;
+    animation: rise 0.2s ease-out;
+  }
+
+  .toast-stack {
+    @apply pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-3;
+  }
+  .toast {
+    @apply pointer-events-auto flex max-w-md items-center gap-2 rounded-xl border px-4 py-3 text-sm shadow-xl backdrop-blur transition duration-300;
+    animation: rise 0.2s ease-out;
+  }
+  .toast-success {
+    @apply border-emerald-500/30 bg-ink-850/95 text-emerald-200;
+  }
+  .toast-error {
+    @apply border-rose-500/40 bg-ink-850/95 text-rose-200;
+  }
+
+  .fade-in {
+    animation: fade 0.25s ease-out;
+  }
+}
+
+@keyframes rise {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
