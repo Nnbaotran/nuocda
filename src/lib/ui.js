@@ -12,6 +12,7 @@ const ICON_PATHS = {
   calendar: 'M3 6h18v15H3zM3 10h18M8 3v4M16 3v4',
   wallet: 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13h2',
   chart: 'M3 3v18h18M7 15l4-4 3 3 5-6',
+  cash: 'M3 6h18v12H3zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6.5 9.5h.01M17.5 14.5h.01',
   key: 'M15 7a4 4 0 1 1-3.9 5H3v3h3v3h3v-3h2.1A4 4 0 0 1 15 7zM16 10h.01',
   menu: 'M4 6h16M4 12h16M4 18h16',
   x: 'M6 6l12 12M18 6 6 18',
