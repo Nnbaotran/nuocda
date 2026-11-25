@@ -1,12 +1,20 @@
 // Danh sách hồ sơ khách (chỉ Chủ). Bấm vào khách -> mở hồ sơ 3 thẻ.
 import { $, html, setHtml } from '../../lib/dom.js';
 import { emptyState, errorState, icon, loadingState } from '../../lib/ui.js';
+import { formatVND } from '../../lib/format.js';
+import { customerBalances } from '../orders/api.js';
 import { listCustomers } from './api.js';
 import { openCreateCustomer } from './forms.js';
 import { matchCustomer } from './logic.js';
 
+function debtTag(b) {
+  if (b > 0) return html`<span class="text-right text-xs"><span class="block text-slate-500">Còn nợ</span><span class="font-semibold text-amber-300 tabular-nums">${formatVND(b)}</span></span>`;
+  if (b < 0) return html`<span class="text-right text-xs"><span class="block text-slate-500">Trả dư</span><span class="font-semibold text-emerald-300 tabular-nums">${formatVND(-b)}</span></span>`;
+  return '';
+}
+
 export function renderCustomers(root) {
-  const state = { items: [], query: '', status: 'active' };
+  const state = { items: [], balances: new Map(), query: '', status: 'active' };
   setHtml(
     root,
     html`<section class="space-y-4">
@@ -31,7 +39,7 @@ export function renderCustomers(root) {
   async function load() {
     setHtml(listEl, loadingState());
     try {
-      state.items = await listCustomers();
+      [state.items, state.balances] = await Promise.all([listCustomers(), customerBalances()]);
       draw();
     } catch (err) {
       setHtml(listEl, errorState(err.message, load));
@@ -60,6 +68,7 @@ export function renderCustomers(root) {
                 <span class="block truncate font-semibold text-white">${c.name}</span>
                 <span class="block truncate text-xs text-slate-500">${[c.phone, c.address].filter(Boolean).join(' · ') || 'Chưa có SĐT, địa chỉ'}</span>
               </span>
+              ${debtTag(state.balances.get(c.id) ?? 0)}
               ${c.is_active ? '' : html`<span class="badge-gray">Ngừng</span>`}
               <span class="text-slate-600" aria-hidden="true">›</span>
             </a>
