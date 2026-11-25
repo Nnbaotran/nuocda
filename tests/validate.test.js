@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { validateStaffAccount } from '../src/modules/accounts/validate.js';
 import { normalizeSku, validateProduct } from '../src/modules/products/validate.js';
 
 const good = { name: ' Đá cây ', sku: 'da cay', unit: 'cây', price: '30.000', note: '', is_active: true };
@@ -31,10 +30,4 @@ test('validateProduct: giá', () => {
 
 test('normalizeSku: bỏ dấu, viết hoa', () => {
   assert.equal(normalizeSku('đá viên 1'), 'DA-VIEN-1');
-});
-
-test('validateStaffAccount', () => {
-  assert.equal(validateStaffAccount({ full_name: 'An', email: 'An@Vidu.com', password: '12345678' }).value.email, 'an@vidu.com');
-  const bad = validateStaffAccount({ full_name: '', email: 'sai', password: '123' });
-  assert.deepEqual(Object.keys(bad.errors).sort(), ['email', 'full_name', 'password']);
 });

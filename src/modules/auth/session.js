@@ -1,4 +1,4 @@
-// Quản lý đăng nhập và hồ sơ (vai trò OWNER/STAFF) của người đang dùng app.
+// Quản lý đăng nhập. App chỉ dành cho MỘT tài khoản: Chủ (OWNER).
 // LƯU Ý: việc ẩn/hiện nút ở giao diện chỉ để tiện dùng; quyền thật được database (RLS) kiểm tra.
 import { friendlyError, supabase } from '../../lib/supabase.js';
 
@@ -14,6 +14,11 @@ export function currentUser() {
 export function currentProfile() {
   return state.profile;
 }
+/** Tên hiển thị: tên đã đặt, nếu chưa có thì dùng email. */
+export function displayName() {
+  return state.profile?.full_name || state.user?.email || 'Chủ';
+}
+
 export function isOwner() {
   return state.profile?.role === ROLES.OWNER && state.profile?.is_active === true;
 }
@@ -33,8 +38,8 @@ async function loadProfile(user) {
     .eq('id', user.id)
     .maybeSingle();
   if (error) throw new Error(friendlyError(error, 'Không tải được hồ sơ tài khoản'));
-  if (!data) throw new Error('Tài khoản chưa có hồ sơ, vui lòng liên hệ Chủ');
-  if (!data.is_active) throw new Error('Tài khoản đang bị khoá, vui lòng liên hệ Chủ');
+  if (!data) throw new Error('Tài khoản này không có quyền dùng ứng dụng');
+  if (!data.is_active || data.role !== ROLES.OWNER) throw new Error('Tài khoản này không có quyền dùng ứng dụng');
   return data;
 }
 

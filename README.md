@@ -8,7 +8,7 @@
 
 | Giai đoạn | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | Đăng nhập, phân quyền, sản phẩm, tài khoản nhân viên | ✅ `v0.1.0` |
+| 1 | Đăng nhập (1 tài khoản Chủ), sản phẩm | ✅ `v0.1.0` |
 | 2 | Khách hàng + giá riêng | ✅ `v0.2.0` |
 | 3 | Đơn hàng + công nợ | ⏳ |
 | 4 | Nhân viên + chấm công + lương | ⏳ |
@@ -43,12 +43,15 @@ npm run build             # tạo bản hoàn chỉnh trong thư mục dist/
 
 > Không bao giờ đưa khoá `service_role` vào `.env` hay Cloudflare. Khoá đó chỉ nằm trên máy chủ Supabase (Edge Function dùng tự động).
 
-## Tạo tài khoản Chủ lần đầu
+## Tài khoản
 
-1. Supabase → **Authentication → Users → Add user → Create new user**, nhập email + mật khẩu, tích *Auto confirm*.
-   Người dùng **đầu tiên** tự động thành **Chủ (OWNER)**.
-2. Supabase → **Authentication → Sign In / Providers**: **tắt "Allow new users to sign up"**. Từ đây chỉ Chủ tạo được tài khoản (trong app, mục *Tài khoản đăng nhập*).
-   (Kể cả khi quên tắt, người tự đăng ký vẫn bị khoá cho tới khi Chủ mở.)
+App chỉ có **một tài khoản duy nhất: Chủ**. Nhân viên KHÔNG đăng nhập; họ chỉ là danh sách do Chủ tạo để chấm công, tính lương (giai đoạn 4).
+
+1. Tạo tài khoản Chủ: Supabase → **Authentication → Users → Add user → Create new user** (email + mật khẩu, tích *Auto confirm*).
+   Người dùng **đầu tiên** tự động thành Chủ. *(Đã tạo ngày 25/11/2026.)*
+2. Supabase → **Authentication → Sign In / Providers**: **tắt "Allow new users to sign up"**.
+   (Kể cả khi quên tắt, tài khoản lạ cũng không xem được dữ liệu và bị app từ chối.)
+3. Quên mật khẩu: Supabase → Authentication → Users → chọn tài khoản → đặt lại mật khẩu.
 
 ## Cấu trúc thư mục
 
@@ -65,31 +68,29 @@ src/
     auth/                  Đăng nhập, phiên, vai trò
     layout/                Header, sidebar, thanh điều hướng điện thoại
     products/              Sản phẩm (api, kiểm tra dữ liệu, màn hình)
-    accounts/              Tài khoản đăng nhập (Chủ quản lý)
     customers/             Hồ sơ khách, popup giá lần đầu, hồ sơ 3 thẻ, bảng giá riêng
     home/, placeholder/    Trang tổng quan, trang "Sắp có"
 supabase/
   migrations/              Thay đổi database theo thứ tự thời gian (đã áp lên Supabase)
   rollback/                Câu lệnh quay lui tương ứng từng migration
-  functions/create-staff/  Edge Function: Chủ tạo tài khoản nhân viên
+  functions/create-staff/  (đã ngừng – không dùng nữa, có thể xoá trên Supabase)
   seed.sql                 Dữ liệu mẫu (4 loại đá)
 tests/                     Kiểm thử (node:test)
 ```
 
 ## Phân quyền (ép ở database bằng RLS)
 
-| Bảng | Chủ (OWNER) | Nhân viên (STAFF) | Chưa đăng nhập |
-|---|---|---|---|
-| `products` | xem, thêm, sửa, xoá | chỉ xem | không thấy gì |
-| `profiles` | xem tất cả; sửa tên/vai trò/khoá | chỉ xem của mình | không thấy gì |
-| `customers`, `customer_prices` | xem, thêm, sửa, xoá | chỉ xem (cần để lên đơn) | không thấy gì |
+| Bảng | Chủ (OWNER) | Tài khoản khác / chưa đăng nhập |
+|---|---|---|
+| `products`, `customers`, `customer_prices` | xem, thêm, sửa, xoá | không thấy gì |
+| `profiles` | xem, sửa | chỉ thấy hồ sơ của chính mình |
 
 Hàm database (RPC):
 - `create_customer(...)`: tạo hồ sơ khách + giá lần đầu trong **một giao dịch** (lỗi giữa chừng thì không tạo gì).
 - `set_customer_prices(customer_id, prices)`: lưu các giá đã đổi của một khách.
 - Trigger: thêm sản phẩm mới → tự có giá (= giá chung) cho mọi khách. Giá riêng là bản sao độc lập, đổi giá chung sau này không ảnh hưởng.
 
-- Tài khoản bị khoá: không xem được gì, app tự đăng xuất.
+- Tài khoản không phải Chủ: không xem được gì, app từ chối đăng nhập.
 - Database chặn việc khoá/hạ quyền **Chủ cuối cùng**.
 - Quy ước bảng mới: bật RLS, `revoke all … from anon`, chỉ `grant` đúng thao tác cần cho `authenticated`.
 
