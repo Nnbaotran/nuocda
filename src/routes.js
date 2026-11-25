@@ -5,6 +5,7 @@
 import { matchPath } from './lib/router.js';
 import { renderCustomerDetail } from './modules/customers/detail-view.js';
 import { renderCustomers } from './modules/customers/list-view.js';
+import { renderExpenses } from './modules/expenses/view.js';
 import { renderHome } from './modules/home/view.js';
 import { renderOrderDetail } from './modules/orders/detail-view.js';
 import { renderOrders } from './modules/orders/list-view.js';
@@ -13,6 +14,7 @@ import { renderAttendance } from './modules/payroll/attendance-view.js';
 import { renderEmployees } from './modules/payroll/employees-view.js';
 import { renderPayroll } from './modules/payroll/payroll-view.js';
 import { renderProducts } from './modules/products/view.js';
+import { renderReports } from './modules/reports/view.js';
 
 const OWNER = ['OWNER'];
 
@@ -27,8 +29,8 @@ export const ROUTES = [
   { path: '/cham-cong', label: 'Chấm công', icon: 'calendar', roles: OWNER, render: renderAttendance },
   { path: '/luong', label: 'Bảng lương', icon: 'cash', roles: OWNER, render: renderPayroll },
   { path: '/nhan-vien', label: 'Nhân viên', icon: 'id', roles: OWNER, render: renderEmployees },
-  { path: '/chi-phi', label: 'Chi phí', icon: 'wallet', roles: OWNER, phase: 5 },
-  { path: '/bao-cao', label: 'Báo cáo', icon: 'chart', roles: OWNER, phase: 5 },
+  { path: '/chi-phi', label: 'Chi phí', icon: 'wallet', roles: OWNER, render: renderExpenses },
+  { path: '/bao-cao', label: 'Báo cáo', icon: 'chart', roles: OWNER, render: renderReports },
 ];
 
 /** Các mục hiện trong menu cho vai trò này. */

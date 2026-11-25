@@ -12,7 +12,7 @@
 | 2 | Khách hàng + giá riêng | ✅ `v0.2.0` |
 | 3 | Đơn hàng + công nợ | ✅ `v0.3.0` |
 | 4 | Nhân viên + chấm công + lương | ✅ `v0.4.0` |
-| 5 | Chi phí + báo cáo | ⏳ |
+| 5 | Chi phí + báo cáo | ✅ `v0.5.0` |
 | 6 | Hoàn thiện deploy | ⏳ |
 
 ## Chạy ở máy tính
@@ -71,6 +71,8 @@ src/
     customers/             Hồ sơ khách, popup giá lần đầu, hồ sơ 3 thẻ (giá bán, bán hàng, công nợ)
     orders/                Khung lên/sửa đơn, danh sách đơn, chi tiết đơn, logic tiền (có test)
     payroll/               Nhân viên, chấm công (theo ngày + bảng tháng), bảng lương, thưởng/phạt, logic lương (có test)
+    expenses/              Chi phí: lọc ngày/danh mục, thêm/sửa/xoá
+    reports/               Báo cáo: thẻ tổng quan, biểu đồ SVG thuần, theo khách, theo sản phẩm, xuất CSV
     home/, placeholder/    Trang tổng quan, trang "Sắp có"
 supabase/
   migrations/              Thay đổi database theo thứ tự thời gian (đã áp lên Supabase)
@@ -88,6 +90,7 @@ tests/                     Kiểm thử (node:test)
 | `orders`, `order_items`, `payments`, `audit_logs` | chỉ xem trực tiếp; ghi qua hàm bên dưới | không thấy gì |
 | `employees`, `attendance`, `salary_adjustments` | xem, thêm, sửa, xoá (tháng đã chốt bị khoá) | không thấy gì |
 | `payroll` (bảng lương đã chốt) | chỉ xem; ghi qua `close_payroll` / `reopen_payroll` | không thấy gì |
+| `expenses` | xem, thêm, sửa, xoá | không thấy gì |
 | `profiles` | xem, sửa | chỉ thấy hồ sơ của chính mình |
 
 Hàm database (RPC):
@@ -119,6 +122,20 @@ Nợ cuối kỳ = nợ đầu kỳ + phát sinh tăng − phát sinh giảm. S�
 - `close_payroll(tháng)`: chốt → lưu bản chụp, **khoá** chấm công + thưởng/phạt tháng đó (chặn ngay trong database).
 - `reopen_payroll(tháng, lý do)`: mở chốt để sửa, bản cũ lưu trong `audit_logs`.
 - Xuất bảng lương ra file CSV (mở bằng Excel).
+
+### Chi phí & báo cáo (giai đoạn 5)
+Hàm `report_overview(từ, đến, có_tính_lương)` tổng hợp mọi số liệu trong database (chỉ đơn/phiếu thu còn hiệu lực, ngày theo giờ VN):
+
+| Số liệu | Cách tính |
+|---|---|
+| Doanh thu | Σ tổng tiền đơn trong khoảng |
+| Đã thu | Σ tiền trả lúc mua (đơn trong khoảng) + Σ phiếu thu nợ trong khoảng |
+| Chi phí | Σ chi phí trong khoảng (+ lương nếu chọn) |
+| Lương | Σ thực lĩnh bảng lương **đã chốt** của tháng có ngày 1 nằm trong khoảng |
+| Lợi nhuận | Doanh thu − chi phí (− lương) |
+| Công nợ phải thu | Tổng nợ mọi khách tính đến hết ngày cuối khoảng |
+
+Biểu đồ theo ngày nếu khoảng ≤ 62 ngày, theo tháng nếu dài hơn; tổng các điểm luôn bằng số tổng. Mỗi góc nhìn xuất được CSV.
 
 - Tài khoản không phải Chủ: không xem được gì, app từ chối đăng nhập.
 - Database chặn việc khoá/hạ quyền **Chủ cuối cùng**.
