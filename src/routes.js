@@ -9,6 +9,9 @@ import { renderHome } from './modules/home/view.js';
 import { renderOrderDetail } from './modules/orders/detail-view.js';
 import { renderOrders } from './modules/orders/list-view.js';
 import { renderComingSoon } from './modules/placeholder/view.js';
+import { renderAttendance } from './modules/payroll/attendance-view.js';
+import { renderEmployees } from './modules/payroll/employees-view.js';
+import { renderPayroll } from './modules/payroll/payroll-view.js';
 import { renderProducts } from './modules/products/view.js';
 
 const OWNER = ['OWNER'];
@@ -21,7 +24,9 @@ export const ROUTES = [
   { path: '/don-hang', label: 'Đơn hàng', icon: 'receipt', roles: OWNER, render: renderOrders, bottom: true },
   { path: '/don-hang/:id', label: 'Chi tiết đơn', icon: 'receipt', roles: OWNER, render: renderOrderDetail, hidden: true, nav: '/don-hang' },
   { path: '/san-pham', label: 'Sản phẩm', icon: 'box', roles: OWNER, render: renderProducts, bottom: true },
-  { path: '/nhan-vien', label: 'Nhân viên & chấm công', icon: 'id', roles: OWNER, phase: 4 },
+  { path: '/cham-cong', label: 'Chấm công', icon: 'calendar', roles: OWNER, render: renderAttendance },
+  { path: '/luong', label: 'Bảng lương', icon: 'cash', roles: OWNER, render: renderPayroll },
+  { path: '/nhan-vien', label: 'Nhân viên', icon: 'id', roles: OWNER, render: renderEmployees },
   { path: '/chi-phi', label: 'Chi phí', icon: 'wallet', roles: OWNER, phase: 5 },
   { path: '/bao-cao', label: 'Báo cáo', icon: 'chart', roles: OWNER, phase: 5 },
 ];
