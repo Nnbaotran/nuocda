@@ -37,6 +37,12 @@ export async function cancelOrder(orderId, reason) {
   if (error) fail(error, 'Không huỷ được đơn');
 }
 
+/** Xoá hẳn đơn ĐÃ HUỶ khỏi lịch sử (database chặn nếu đơn chưa huỷ). */
+export async function deleteCancelledOrder(orderId) {
+  const { error } = await supabase.rpc('delete_cancelled_order', { p_order_id: orderId });
+  if (error) fail(error, 'Không xoá được đơn');
+}
+
 /** filters: { from, to ('yyyy-mm-dd' hoặc null), customerId, status ('active'|'cancelled'|'all') } */
 export async function listOrders({ from, to, customerId, status = 'all', limit = 500 } = {}) {
   const { gte, lt } = rangeToTimestamps(from, to);
