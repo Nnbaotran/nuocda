@@ -2,6 +2,8 @@
 
 Ứng dụng web (ưu tiên điện thoại) theo dõi bán hàng, công nợ khách, nhân viên, chấm công, lương, chi phí và báo cáo.
 
+**Địa chỉ app:** https://nuocda.pages.dev (Cloudflare Pages, tự build lại mỗi khi đẩy code lên `main`).
+
 **Công nghệ:** HTML + JavaScript thuần (ES modules) · Tailwind CSS v4 (build bằng npm) · Supabase (đăng nhập, PostgreSQL, RLS) · Cloudflare Pages.
 
 ## Tiến độ
@@ -13,7 +15,7 @@
 | 3 | Đơn hàng + công nợ | ✅ `v0.3.0` |
 | 4 | Nhân viên + chấm công + lương | ✅ `v0.4.0` |
 | 5 | Chi phí + báo cáo | ✅ `v0.5.0` |
-| 6 | Hoàn thiện deploy | ⏳ |
+| 6 | Deploy Cloudflare Pages | ✅ đang chạy |
 
 ## Chạy ở máy tính
 
