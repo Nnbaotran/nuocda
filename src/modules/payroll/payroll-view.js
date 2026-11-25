@@ -2,13 +2,12 @@
 import { formatDateStr, todayVN } from '../../lib/dates.js';
 import { $, html, setHtml } from '../../lib/dom.js';
 import { downloadText } from '../../lib/download.js';
-import { formatDateTime, formatVND } from '../../lib/format.js';
+import { formatDateTime, formatQty, formatVND } from '../../lib/format.js';
 import { bindMoneyInputs, confirmDialog, emptyState, errorState, icon, loadingState, moneyValue, openModal, promptReason, showFieldErrors, toast } from '../../lib/ui.js';
 import { closePayroll, createAdjustment, deleteAdjustment, listAdjustments, listEmployees, payrollPreview, reopenPayroll } from './api.js';
 import { monthLabel, monthRange, SALARY_TYPES, toCSV } from './logic.js';
 import { currentMonth, mountMonthPicker } from './month-picker.js';
 
-const unitsText = (u) => String(Number(u)).replace('.', ',');
 
 export function renderPayroll(root) {
   const state = { ym: currentMonth(), rows: [], adjustments: [], closed: false };
@@ -64,7 +63,7 @@ export function renderPayroll(root) {
                   <p class="truncate font-semibold text-fg">${r.employee_name}</p>
                   <p class="font-bold text-accent-ink tabular-nums">${formatVND(r.net_pay)}</p>
                 </div>
-                <p class="mt-1 text-xs text-subtle">${SALARY_TYPES[r.salary_type].label} ${formatVND(r.salary_amount)} · ${unitsText(r.work_units)} công${r.salary_type === 'monthly' ? ` / ${r.days_in_month} ngày` : ''}</p>
+                <p class="mt-1 text-xs text-subtle">${SALARY_TYPES[r.salary_type].label} ${formatVND(r.salary_amount)} · ${formatQty(r.work_units)} công${r.salary_type === 'monthly' ? ` / ${r.days_in_month} ngày` : ''}</p>
                 <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
                   <div><p class="text-subtle">Theo công</p><p class="tabular-nums">${formatVND(r.base_pay)}</p></div>
                   <div><p class="text-subtle">Thưởng</p><p class="text-good tabular-nums">+${formatVND(r.bonus)}</p></div>
@@ -79,7 +78,7 @@ export function renderPayroll(root) {
                   ${rows.map((r) => html`<tr>
                     <td class="font-medium text-fg">${r.employee_name}<span class="block text-xs text-subtle">${r.position}</span></td>
                     <td class="text-muted">${formatVND(r.salary_amount)} ${SALARY_TYPES[r.salary_type].unit}</td>
-                    <td class="text-right tabular-nums">${unitsText(r.work_units)}${r.salary_type === 'monthly' ? html`<span class="text-subtle">/${r.days_in_month}</span>` : ''}</td>
+                    <td class="text-right tabular-nums">${formatQty(r.work_units)}${r.salary_type === 'monthly' ? html`<span class="text-subtle">/${r.days_in_month}</span>` : ''}</td>
                     <td class="text-right tabular-nums">${formatVND(r.base_pay)}</td>
                     <td class="text-right text-good tabular-nums">${formatVND(r.bonus)}</td>
                     <td class="text-right text-bad tabular-nums">${formatVND(r.penalty)}</td>
@@ -177,7 +176,7 @@ export function renderPayroll(root) {
       { label: 'Cách trả lương', value: (r) => SALARY_TYPES[r.salary_type].label },
       { key: 'salary_amount', label: 'Mức lương' },
       { label: 'Số ngày của tháng', value: (r) => (r.salary_type === 'monthly' ? r.days_in_month : '') },
-      { label: 'Số công', value: (r) => unitsText(r.work_units) },
+      { label: 'Số công', value: (r) => formatQty(r.work_units) },
       { key: 'base_pay', label: 'Lương theo công' },
       { key: 'bonus', label: 'Thưởng' },
       { key: 'penalty', label: 'Phạt' },

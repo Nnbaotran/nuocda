@@ -60,12 +60,14 @@ App chỉ có **một tài khoản duy nhất: Chủ**. Nhân viên KHÔNG đăn
 ```
 index.html                 Khung trang
 public/                    File tĩnh (favicon, _headers bảo mật cho Cloudflare)
-scripts/build.mjs          Build: esbuild gói JS, đưa cấu hình .env vào
+scripts/build.mjs          Build: esbuild gói JS + chia nhỏ theo trang (assets/chunks/), đưa cấu hình .env vào
+design/logo-source.mjs     Nguồn vẽ logo (xuất ra public/assets)
 src/
   config.js                MỌI cấu hình/đường link nằm ở đây
   main.js, routes.js       Khởi động app, danh sách màn hình + quyền xem
   styles.css               Tailwind + bộ giao diện (nút, thẻ, bảng, form…)
-  lib/                     Dùng chung: format tiền/ngày, DOM an toàn, UI, kết nối Supabase
+  lib/                     Dùng chung: format tiền/ngày, DOM an toàn, UI, sáng/tối, thiết bị,
+                           kết nối Supabase (tải sau), báo lỗi tiếng Việt, bộ nhớ tạm danh sách
   modules/
     auth/                  Đăng nhập, phiên, vai trò
     layout/                Header, sidebar, thanh điều hướng điện thoại
@@ -75,7 +77,7 @@ src/
     payroll/               Nhân viên, chấm công (theo ngày + bảng tháng), bảng lương, thưởng/phạt, logic lương (có test)
     expenses/              Chi phí: lọc ngày/danh mục, thêm/sửa/xoá
     reports/               Báo cáo: thẻ tổng quan, biểu đồ SVG thuần, theo khách, theo sản phẩm, xuất CSV
-    home/, placeholder/    Trang tổng quan, trang "Sắp có"
+    home/                  Trang tổng quan
 supabase/
   migrations/              Thay đổi database theo thứ tự thời gian (đã áp lên Supabase)
   rollback/                Câu lệnh quay lui tương ứng từng migration
@@ -148,3 +150,12 @@ Biểu đồ theo ngày nếu khoảng ≤ 62 ngày, theo tháng nếu dài hơn
 - Tiền lưu số nguyên VND (`bigint`), hiển thị `1.234.567 ₫`; ngày `dd/mm/yyyy` theo giờ Việt Nam.
 - Mỗi tính năng/sửa lỗi làm trên nhánh `feature/…` hoặc `fix/…`, gộp vào `main` khi chạy ổn, gắn tag sau mỗi giai đoạn.
 - Thay đổi database: thêm file mới vào `supabase/migrations/` kèm file quay lui trong `supabase/rollback/`.
+
+## Tốc độ tải
+
+- **Vẽ màn hình trước, tải thư viện sau:** thư viện Supabase (hơn nửa dung lượng app) chỉ tải khi cần, ở nền.
+- **Chia nhỏ theo trang:** mở trang nào mới tải mã trang đó (`assets/chunks/*-<mã băm>.js`, trình duyệt nhớ lâu).
+- **Nhớ hồ sơ đăng nhập:** mở app hiện màn hình ngay, kiểm tra quyền với máy chủ chạy ở nền.
+- **Nhớ tạm danh sách** sản phẩm/khách/nhân viên 30 giây (`lib/cache.js`); tiền, đơn, công nợ, giá luôn đọc mới.
+- **Service worker** lưu sẵn file giao diện → mở lại gần như tức thì.
+- Đo ngày 25/11/2026: mã cần tải trước khi thấy màn hình đầu ~360 KB → ~25 KB.

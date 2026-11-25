@@ -2,9 +2,9 @@
 // theo khoảng ngày; ghi nhận khách trả nợ; huỷ phiếu thu nhập nhầm.
 import { formatDateStr, todayVN } from '../../lib/dates.js';
 import { $, html, setHtml } from '../../lib/dom.js';
-import { formatVND, groupThousands } from '../../lib/format.js';
+import { formatSignedVND, formatVND, groupThousands } from '../../lib/format.js';
 import { mountRangeFilter } from '../../lib/range-filter.js';
-import { bindMoneyInputs, emptyState, errorState, icon, loadingState, moneyValue, openModal, promptReason, showFieldErrors, toast } from '../../lib/ui.js';
+import { bindMoneyInputs, emptyState, statCard, errorState, icon, loadingState, moneyValue, openModal, promptReason, showFieldErrors, toast } from '../../lib/ui.js';
 import { cancelPayment, customerBalances, customerLedger, recordPayment } from '../orders/api.js';
 import { balanceLabel, buildLedger } from '../orders/logic.js';
 
@@ -52,23 +52,15 @@ export function renderDebtTab(panel, { customer }) {
     }
   }
 
-  function card(label, value, cls = 'text-fg') {
-    return html`<div class="card p-3">
-      <p class="text-xs text-muted">${label}</p>
-      <p class="mt-1 text-lg font-bold tabular-nums ${cls}">${value}</p>
-    </div>`;
-  }
-
   function drawLedger(l) {
-    const money = (n) => (n < 0 ? `−${formatVND(-n)}` : formatVND(n));
     setHtml(
       ledgerEl,
       html`<div class="space-y-4">
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-          ${card('Nợ đầu kỳ', money(l.opening))}
-          ${card('Phát sinh tăng', `+${formatVND(l.increase)}`, 'text-warn')}
-          ${card('Phát sinh giảm', `−${formatVND(l.decrease)}`, 'text-good')}
-          ${card('Nợ cuối kỳ', money(l.closing), l.closing > 0 ? 'text-warn' : 'text-good')}
+          ${statCard('Nợ đầu kỳ', formatSignedVND(l.opening))}
+          ${statCard('Phát sinh tăng', `+${formatVND(l.increase)}`, { cls: 'text-warn' })}
+          ${statCard('Phát sinh giảm', `−${formatVND(l.decrease)}`, { cls: 'text-good' })}
+          ${statCard('Nợ cuối kỳ', formatSignedVND(l.closing), { cls: l.closing > 0 ? 'text-warn' : 'text-good' })}
         </div>
         ${l.rows.length === 0
           ? emptyState('Không có phát sinh trong khoảng ngày này')
@@ -87,7 +79,7 @@ export function renderDebtTab(panel, { customer }) {
                     <p class="font-semibold tabular-nums ${r.increase ? 'text-warn' : 'text-good'}">
                       ${r.increase ? `+${formatVND(r.increase)}` : `−${formatVND(r.decrease)}`}
                     </p>
-                    <p class="text-xs text-subtle tabular-nums">Dư: ${money(r.balance)}</p>
+                    <p class="text-xs text-subtle tabular-nums">Dư: ${formatSignedVND(r.balance)}</p>
                     ${r.kind === 'payment' ? html`<button class="mt-1 text-xs text-bad hover:underline" data-cancel-pay="${r.id}" data-amount="${r.decrease}">Huỷ phiếu</button>` : ''}
                   </div>
                 </li>`,

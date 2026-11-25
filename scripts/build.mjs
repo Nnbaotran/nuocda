@@ -34,7 +34,9 @@ const version = Date.now().toString(36);
 
 function copyStatic() {
   mkdirSync(resolve(dist, 'assets'), { recursive: true });
-  const html = readFileSync(resolve(root, 'index.html'), 'utf8').replaceAll('__BUILD_VERSION__', version);
+  const html = readFileSync(resolve(root, 'index.html'), 'utf8')
+    .replaceAll('__BUILD_VERSION__', version)
+    .replaceAll('__SUPABASE_ORIGIN__', new URL(env.SUPABASE_URL).origin);
   writeFileSync(resolve(dist, 'index.html'), html);
   if (existsSync(resolve(root, 'public'))) cpSync(resolve(root, 'public'), dist, { recursive: true });
   // Mỗi bản build có mã riêng để service worker bỏ bộ nhớ đệm cũ
@@ -43,13 +45,17 @@ function copyStatic() {
 }
 
 const options = {
-  entryPoints: [resolve(root, 'src/main.js')],
+  // Chia nhỏ mã (code splitting): app.js chỉ chứa phần khởi động; mỗi trang + thư viện Supabase
+  // nằm ở file riêng trong assets/chunks/ (tên có mã băm -> trình duyệt nhớ lâu, đổi nội dung là đổi tên).
+  entryPoints: { app: resolve(root, 'src/main.js') },
   bundle: true,
+  splitting: true,
   format: 'esm',
   target: 'es2020',
   minify: !serve,
   sourcemap: serve,
-  outfile: resolve(dist, 'assets/app.js'),
+  outdir: resolve(dist, 'assets'),
+  chunkNames: 'chunks/[name]-[hash]',
   define: {
     __SUPABASE_URL__: JSON.stringify(env.SUPABASE_URL),
     __SUPABASE_ANON_KEY__: JSON.stringify(env.SUPABASE_ANON_KEY),

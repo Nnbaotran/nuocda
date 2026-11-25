@@ -1,23 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
+// Kết nối Supabase — TẢI SAU (lazy): thư viện supabase-js chiếm hơn nửa dung lượng app,
+// nên không bắt điện thoại tải nó trước khi vẽ màn hình. Gọi `await db()` để lấy client;
+// lần đầu sẽ tải thư viện, các lần sau dùng lại ngay.
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config.js';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true },
-});
+let clientPromise = null;
 
-/** Đổi lỗi kỹ thuật của Supabase/Postgres thành câu tiếng Việt dễ hiểu. */
-export function friendlyError(error, fallback = 'Có lỗi xảy ra, vui lòng thử lại') {
-  if (!error) return fallback;
-  const msg = String(error.message ?? error);
-  const code = error.code;
-  if (/Failed to fetch|NetworkError|network/i.test(msg)) return 'Mất kết nối mạng, kiểm tra Internet rồi thử lại';
-  if (/Invalid login credentials/i.test(msg)) return 'Sai email hoặc mật khẩu';
-  if (/Email not confirmed/i.test(msg)) return 'Email chưa được xác nhận';
-  if (/JWT expired|session/i.test(msg)) return 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại';
-  if (code === '23505') return 'Dữ liệu bị trùng (ví dụ mã SKU đã tồn tại)';
-  if (code === '23503') return 'Dữ liệu đang được dùng ở nơi khác nên không xoá được';
-  if (code === '23514') return 'Dữ liệu không hợp lệ (ngoài giới hạn cho phép)';
-  if (code === '42501' || /row-level security|permission denied/i.test(msg)) return 'Bạn không có quyền thực hiện thao tác này';
-  if (code === 'P0001' && msg) return msg; // lỗi do database tự báo bằng tiếng Việt
-  return fallback;
+export function db() {
+  clientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
+    createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true },
+    }),
+  );
+  return clientPromise;
 }
+
+/** Bắt đầu tải thư viện ở nền (không chờ). */
+export function preloadDb() {
+  db().catch(() => {
+    /* lỗi mạng sẽ được báo khi thật sự gọi db() */
+  });
+}
+
+/** Khoá lưu phiên đăng nhập của supabase-js trong localStorage (mặc định: sb-<mã dự án>-auth-token). */
+export function sessionStorageKey() {
+  try {
+    return `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
+  } catch {
+    return '';
+  }
+}
+
+export { friendlyError, throwFriendly } from './errors.js';

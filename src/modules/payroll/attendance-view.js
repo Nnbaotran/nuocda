@@ -1,6 +1,7 @@
 // Trang Chấm công (Chủ tự chấm). Hai cách xem:
 //  - Theo ngày: mỗi nhân viên 4 nút Đi làm / Nửa ngày / Nghỉ / Nghỉ phép — bấm là lưu.
 //  - Bảng tháng: lưới ngày × nhân viên, bấm ô để sửa chi tiết (số công, giờ vào-ra, ghi chú).
+import { formatQty } from '../../lib/format.js';
 import { addDays, formatDateStr, todayVN } from '../../lib/dates.js';
 import { $, $$, html, setHtml } from '../../lib/dom.js';
 import { errorState, emptyState, loadingState, openModal, showFieldErrors, toast } from '../../lib/ui.js';
@@ -9,7 +10,6 @@ import { clearAttendance, isMonthClosed, listAttendance, listEmployees, saveAtte
 import { ATT_ORDER, ATT_STATUS, daysInMonth, monthLabel, monthRange, sumUnits } from './logic.js';
 import { currentMonth, mountMonthPicker } from './month-picker.js';
 
-const unitsText = (u) => String(Number(u)).replace('.', ',');
 const WEEKDAY = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const weekday = (d) => WEEKDAY[new Date(`${d}T00:00:00Z`).getUTCDay()];
 
@@ -33,7 +33,7 @@ function openCellEditor({ employee, date, record, locked, onDone }) {
       </div>
       <div>
         <label class="field-label" for="ce-units">Số công</label>
-        <input class="input w-32 text-center tabular-nums" id="ce-units" name="units" inputmode="decimal" value="${unitsText(r.units)}" />
+        <input class="input w-32 text-center tabular-nums" id="ce-units" name="units" inputmode="decimal" value="${formatQty(r.units)}" />
         <p class="mt-1 text-xs text-subtle">Tự điền theo lựa chọn ở trên (đi làm 1, nửa ngày 0,5); sửa tay được, tối đa 3.</p>
         <p class="field-error hidden" data-error-for="units"></p>
       </div>
@@ -61,7 +61,7 @@ function openCellEditor({ employee, date, record, locked, onDone }) {
   // Đổi lựa chọn -> tự điền số công mặc định
   $$('input[name=status]', el).forEach((radio) =>
     radio.addEventListener('change', () => {
-      el.querySelector('[name=units]').value = unitsText(ATT_STATUS[radio.value].units);
+      el.querySelector('[name=units]').value = formatQty(ATT_STATUS[radio.value].units);
     }),
   );
   el.querySelector('[data-clear]')?.addEventListener('click', async () => {
@@ -130,7 +130,7 @@ export function renderAttendance(root) {
               <div class="mb-2 flex items-center justify-between gap-2">
                 <p class="truncate font-medium text-fg">${e.name}</p>
                 <button class="text-xs text-accent-ink hover:underline" data-detail="${e.id}">
-                  ${r ? `${unitsText(r.units)} công${r.check_in ? ` · ${r.check_in.slice(0, 5)}–${r.check_out?.slice(0, 5) ?? ''}` : ''} ›` : 'Chi tiết ›'}</button>
+                  ${r ? `${formatQty(r.units)} công${r.check_in ? ` · ${r.check_in.slice(0, 5)}–${r.check_out?.slice(0, 5) ?? ''}` : ''} ›` : 'Chi tiết ›'}</button>
               </div>
               <div class="grid grid-cols-4 gap-1.5">
                 ${ATT_ORDER.map((k) => html`<button class="min-h-11 rounded-xl text-sm font-medium ring-1 transition disabled:opacity-50 ${r?.status === k ? ATT_STATUS[k].cls : 'bg-fg/[0.03] text-muted ring-fg/10 hover:text-fg'}"
@@ -232,10 +232,10 @@ export function renderAttendance(root) {
                     return html`<td class="border-t border-fg/5 p-0.5 text-center">
                       <button class="grid size-8 place-items-center rounded-lg ring-1 ${r ? ATT_STATUS[r.status].cls : 'text-faint ring-fg/5 hover:ring-accent/40'} disabled:opacity-30"
                         data-cell="${e.id}|${d}" ${future ? 'disabled' : ''} aria-label="${e.name} ngày ${formatDateStr(d)}: ${r ? ATT_STATUS[r.status].label : 'chưa chấm'}"
-                        title="${r ? `${ATT_STATUS[r.status].label} – ${unitsText(r.units)} công` : ''}">${r ? (Number(r.units) !== ATT_STATUS[r.status].units ? unitsText(r.units) : ATT_STATUS[r.status].short) : '·'}</button>
+                        title="${r ? `${ATT_STATUS[r.status].label} – ${formatQty(r.units)} công` : ''}">${r ? (Number(r.units) !== ATT_STATUS[r.status].units ? formatQty(r.units) : ATT_STATUS[r.status].short) : '·'}</button>
                     </td>`;
                   })}
-                  <td class="sticky right-0 border-t border-fg/5 bg-surface px-3 text-right font-semibold text-accent-ink tabular-nums">${unitsText(sumUnits(mine))}</td>
+                  <td class="sticky right-0 border-t border-fg/5 bg-surface px-3 text-right font-semibold text-accent-ink tabular-nums">${formatQty(sumUnits(mine))}</td>
                 </tr>`;
               })}
             </tbody>

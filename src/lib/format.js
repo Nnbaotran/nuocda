@@ -56,3 +56,14 @@ export function formatDateTime(date) {
   const p = parts(date);
   return p ? `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}` : '';
 }
+
+/** Số lượng / số công kiểu Việt Nam: 2.5 -> "2,5"; 10 -> "10" */
+export function formatQty(n) {
+  return String(Number(n) || 0).replace('.', ',');
+}
+
+/** Tiền có dấu âm chuẩn: -100000 -> "−100.000 ₫" */
+export function formatSignedVND(n) {
+  const v = Number(n) || 0;
+  return v < 0 ? `−${formatVND(-v)}` : formatVND(v);
+}

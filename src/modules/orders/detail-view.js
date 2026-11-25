@@ -1,6 +1,6 @@
 // Chi tiết đơn: các dòng hàng, tổng/đã trả/còn nợ, Sửa đơn, Huỷ đơn, lịch sử sửa/huỷ.
 import { $, html, setHtml } from '../../lib/dom.js';
-import { formatDateTime, formatVND } from '../../lib/format.js';
+import { formatDateTime, formatQty, formatVND } from '../../lib/format.js';
 import { confirmDialog, errorState, icon, loadingState, openModal, promptReason, toast } from '../../lib/ui.js';
 import { getCustomerPrices } from '../customers/api.js';
 import { buildPriceRows } from '../customers/logic.js';
@@ -9,7 +9,6 @@ import { cancelOrder, deleteCancelledOrder, getOrder, updateOrder } from './api.
 import { mountOrderEditor } from './editor.js';
 import { ORDER_STATUS, payModeOf } from './logic.js';
 
-const qtyText = (q) => String(Number(q)).replace('.', ',');
 
 function describeLog(log) {
   if (log.action === 'cancel') {
@@ -20,7 +19,7 @@ function describeLog(log) {
   const parts = [];
   if (b.total !== a.total) parts.push(`tổng ${formatVND(b.total)} → ${formatVND(a.total)}`);
   if (b.paid !== a.paid) parts.push(`đã trả ${formatVND(b.paid)} → ${formatVND(a.paid)}`);
-  const items = (x) => (x.items ?? []).map((i) => `${i.product_name} ${qtyText(i.quantity)}×${formatVND(i.unit_price)}`).join(', ');
+  const items = (x) => (x.items ?? []).map((i) => `${i.product_name} ${formatQty(i.quantity)}×${formatVND(i.unit_price)}`).join(', ');
   if (items(b) !== items(a)) parts.push(`hàng: ${items(b)} → ${items(a)}`);
   if (b.order_date !== a.order_date) parts.push('đổi ngày giờ đơn');
   if ((b.note ?? '') !== (a.note ?? '')) parts.push('đổi ghi chú');
@@ -82,7 +81,7 @@ export function renderOrderDetail(root, { params }) {
             <tbody>
               ${o.items.map((i) => html`<tr>
                 <td class="font-medium text-fg">${i.product_name} <span class="text-xs text-subtle">/ ${i.unit}</span></td>
-                <td class="text-right tabular-nums">${qtyText(i.quantity)}</td>
+                <td class="text-right tabular-nums">${formatQty(i.quantity)}</td>
                 <td class="text-right tabular-nums">${formatVND(i.unit_price)}</td>
                 <td class="text-right font-semibold tabular-nums">${formatVND(i.line_total)}</td>
               </tr>`)}
@@ -129,7 +128,7 @@ export function renderOrderDetail(root, { params }) {
       rows,
       submitLabel: 'Lưu thay đổi',
       initial: {
-        qty: Object.fromEntries(order.items.map((i) => [i.product_id, qtyText(i.quantity)])),
+        qty: Object.fromEntries(order.items.map((i) => [i.product_id, formatQty(i.quantity)])),
         prices: Object.fromEntries(order.items.map((i) => [i.product_id, Number(i.unit_price)])),
         mode: payModeOf(order.total, order.paid),
         paid: order.paid,
