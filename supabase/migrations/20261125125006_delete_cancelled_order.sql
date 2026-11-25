@@ -1,7 +1,7 @@
 -- Cho phép xoá hẳn đơn ĐÃ HUỶ khỏi lịch sử đơn hàng (yêu cầu 25/11/2026).
 -- Chỉ đơn đã huỷ mới xoá được (đơn đã huỷ vốn không còn tính vào doanh thu/công nợ, nên xoá không làm lệch tiền).
 -- Bản chụp đơn được giữ lại trong audit_logs để tra cứu khi cần.
--- Quay lui: supabase/rollback/20261125120000_down.sql
+-- Quay lui: supabase/rollback/20261125125006_down.sql
 
 create or replace function public.delete_cancelled_order(p_order_id uuid)
 returns void
