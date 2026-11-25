@@ -14,9 +14,9 @@ export function mountMonthPicker(container, { value = currentMonth(), onChange }
     setHtml(
       container,
       html`<div class="flex items-center gap-2">
-        <button type="button" class="btn-icon border border-white/10" data-prev aria-label="Tháng trước">‹</button>
-        <p class="min-w-36 flex-1 text-center text-lg font-semibold text-white">${monthLabel(ym)}</p>
-        <button type="button" class="btn-icon border border-white/10 disabled:opacity-30" data-next aria-label="Tháng sau" ${ym >= max ? 'disabled' : ''}>›</button>
+        <button type="button" class="btn-icon border border-fg/10" data-prev aria-label="Tháng trước">‹</button>
+        <p class="min-w-36 flex-1 text-center text-lg font-semibold text-fg">${monthLabel(ym)}</p>
+        <button type="button" class="btn-icon border border-fg/10 disabled:opacity-30" data-next aria-label="Tháng sau" ${ym >= max ? 'disabled' : ''}>›</button>
       </div>`,
     );
     $('[data-prev]', container).addEventListener('click', () => go(-1));

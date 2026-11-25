@@ -11,8 +11,8 @@ export function renderEmployees(root) {
     root,
     html`<section class="space-y-4">
       <div class="flex flex-wrap items-center gap-3">
-        <label class="flex min-h-11 flex-1 items-center gap-2 text-sm text-slate-400">
-          <input type="checkbox" class="size-5 accent-cyan-400" data-inactive /> Hiện cả người đã nghỉ việc
+        <label class="flex min-h-11 flex-1 items-center gap-2 text-sm text-muted">
+          <input type="checkbox" class="size-5 accent-accent" data-inactive /> Hiện cả người đã nghỉ việc
         </label>
         <button class="btn-primary" data-add>${icon('plus', 'size-4')} Thêm nhân viên</button>
       </div>
@@ -44,18 +44,18 @@ export function renderEmployees(root) {
         ${rows.map(
           (e) => html`<li class="card ${e.is_active ? '' : 'opacity-60'}">
             <div class="flex items-start gap-3">
-              <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky-500/25 to-violet-500/25 font-semibold text-white">${e.name.trim().charAt(0).toUpperCase()}</span>
+              <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent/15 to-accent/5 font-semibold text-fg">${e.name.trim().charAt(0).toUpperCase()}</span>
               <div class="min-w-0 flex-1">
-                <p class="truncate font-semibold text-white">${e.name}</p>
-                <p class="truncate text-xs text-slate-500">${[e.position, e.phone].filter(Boolean).join(' · ') || 'Chưa có chức vụ'}</p>
-                <p class="mt-1 text-sm"><span class="font-semibold text-cyan-300 tabular-nums">${formatVND(e.salary_amount)}</span>
-                  <span class="text-slate-500">${SALARY_TYPES[e.salary_type].unit}</span></p>
+                <p class="truncate font-semibold text-fg">${e.name}</p>
+                <p class="truncate text-xs text-subtle">${[e.position, e.phone].filter(Boolean).join(' · ') || 'Chưa có chức vụ'}</p>
+                <p class="mt-1 text-sm"><span class="font-semibold text-accent-ink tabular-nums">${formatVND(e.salary_amount)}</span>
+                  <span class="text-subtle">${SALARY_TYPES[e.salary_type].unit}</span></p>
               </div>
               ${e.is_active ? '' : html`<span class="badge-gray">Nghỉ việc</span>`}
             </div>
-            <div class="mt-3 flex gap-1 border-t border-white/5 pt-2">
+            <div class="mt-3 flex gap-1 border-t border-fg/5 pt-2">
               <button class="btn-secondary flex-1" data-edit="${e.id}">${icon('edit', 'size-4')} Sửa</button>
-              <button class="btn-icon hover:text-rose-400" data-delete="${e.id}" aria-label="Xoá ${e.name}">${icon('trash')}</button>
+              <button class="btn-icon hover:text-bad" data-delete="${e.id}" aria-label="Xoá ${e.name}">${icon('trash')}</button>
             </div>
           </li>`,
         )}
@@ -90,15 +90,15 @@ export function renderEmployees(root) {
         <fieldset>
           <legend class="field-label">Cách trả lương *</legend>
           <div class="grid grid-cols-2 gap-2">
-            ${Object.entries(SALARY_TYPES).map(([k, t]) => html`<label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 has-[:checked]:border-cyan-400/50 has-[:checked]:bg-cyan-500/10">
-              <input type="radio" name="salary_type" value="${k}" class="accent-cyan-400" ${e.salary_type === k ? 'checked' : ''} /> ${t.label}
+            ${Object.entries(SALARY_TYPES).map(([k, t]) => html`<label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fg/10 bg-fg/[0.03] px-3 has-[:checked]:border-accent/50 has-[:checked]:bg-accent/10">
+              <input type="radio" name="salary_type" value="${k}" class="accent-accent" ${e.salary_type === k ? 'checked' : ''} /> ${t.label}
             </label>`)}
           </div>
         </fieldset>
         <div>
           <label class="field-label" for="ef-salary">Mức lương (₫) *</label>
           <input class="input text-right text-lg font-semibold tabular-nums" id="ef-salary" name="salary_amount" data-money inputmode="numeric" value="${groupThousands(e.salary_amount)}" />
-          <p class="mt-1 text-xs text-slate-500">Lương tháng: chia theo số ngày thực tế của tháng rồi nhân số công.</p>
+          <p class="mt-1 text-xs text-subtle">Lương tháng: chia theo số ngày thực tế của tháng rồi nhân số công.</p>
           <p class="field-error hidden" data-error-for="salary_amount"></p>
         </div>
         <div>
@@ -106,8 +106,8 @@ export function renderEmployees(root) {
           <input class="input" id="ef-note" name="note" maxlength="300" value="${e.note}" />
           <p class="field-error hidden" data-error-for="note"></p>
         </div>
-        <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3">
-          <input type="checkbox" name="is_active" class="size-5 accent-cyan-400" ${e.is_active ? 'checked' : ''} /> Đang làm việc
+        <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-fg/10 bg-fg/[0.03] px-3">
+          <input type="checkbox" name="is_active" class="size-5 accent-accent" ${e.is_active ? 'checked' : ''} /> Đang làm việc
         </label>
       </div>`,
       onSubmit: async (form) => {

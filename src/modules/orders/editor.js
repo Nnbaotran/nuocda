@@ -19,27 +19,27 @@ export function mountOrderEditor(container, { rows, initial = {}, submitLabel = 
     container,
     html`<form class="space-y-4" novalidate>
       ${rows.length === 0
-        ? html`<p class="card text-sm text-slate-400">Chưa có sản phẩm đang bán.</p>`
-        : html`<ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+        ? html`<p class="card text-sm text-muted">Chưa có sản phẩm đang bán.</p>`
+        : html`<ul class="divide-y divide-fg/5 overflow-hidden rounded-2xl border border-fg/10 bg-surface/70">
             ${rows.map((r) => {
               const p = prices[r.product_id] ?? r.price;
               const q = qty[r.product_id] ?? '';
               return html`<li class="px-4 py-3" data-line="${r.product_id}">
                 <div class="flex items-baseline justify-between gap-3">
-                  <p class="min-w-0 truncate font-medium text-white">${r.name} <span class="text-xs font-normal text-slate-500">/ ${r.unit}</span>
+                  <p class="min-w-0 truncate font-medium text-fg">${r.name} <span class="text-xs font-normal text-subtle">/ ${r.unit}</span>
                     ${r.is_active ? '' : html`<span class="badge-gray ml-1">Ngừng bán</span>`}</p>
-                  <p class="shrink-0 font-semibold text-cyan-300 tabular-nums" data-line-total></p>
+                  <p class="shrink-0 font-semibold text-accent-ink tabular-nums" data-line-total></p>
                 </div>
                 <div class="mt-2 flex items-center gap-2">
                   <label class="sr-only" for="price-${r.product_id}">Đơn giá ${r.name}</label>
                   <input class="input min-h-10 w-28 text-right text-sm tabular-nums sm:w-32" id="price-${r.product_id}" data-money inputmode="numeric"
                     data-price value="${groupThousands(p)}" title="Đơn giá (₫)" />
-                  <span class="text-xs text-slate-500">₫ ×</span>
+                  <span class="text-xs text-subtle">₫ ×</span>
                   <div class="ml-auto flex items-center gap-1">
-                    <button type="button" class="btn-icon size-10 border border-white/10" data-step="-1" aria-label="Bớt 1 ${r.name}">−</button>
+                    <button type="button" class="btn-icon size-10 border border-fg/10" data-step="-1" aria-label="Bớt 1 ${r.name}">−</button>
                     <label class="sr-only" for="qty-${r.product_id}">Số lượng ${r.name}</label>
                     <input class="input min-h-10 w-16 text-center font-semibold tabular-nums" id="qty-${r.product_id}" data-qty inputmode="decimal" placeholder="0" value="${q}" />
-                    <button type="button" class="btn-icon size-10 border border-white/10" data-step="1" aria-label="Thêm 1 ${r.name}">${icon('plus', 'size-4')}</button>
+                    <button type="button" class="btn-icon size-10 border border-fg/10" data-step="1" aria-label="Thêm 1 ${r.name}">${icon('plus', 'size-4')}</button>
                   </div>
                 </div>
                 <p class="field-error hidden" data-line-error></p>
@@ -49,13 +49,13 @@ export function mountOrderEditor(container, { rows, initial = {}, submitLabel = 
 
       <div class="card space-y-4">
         <div class="flex items-baseline justify-between">
-          <span class="text-slate-400">Tổng tiền</span>
-          <span class="gradient-text text-2xl font-bold tabular-nums" data-total>0 ₫</span>
+          <span class="text-muted">Tổng tiền</span>
+          <span class="text-2xl font-bold text-fg tabular-nums" data-total>0 ₫</span>
         </div>
-        <div class="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1" role="radiogroup" aria-label="Cách thanh toán">
+        <div class="grid grid-cols-3 gap-1 rounded-xl border border-fg/10 bg-fg/[0.03] p-1" role="radiogroup" aria-label="Cách thanh toán">
           ${PAY_MODES.map((m) => html`<label class="cursor-pointer">
             <input type="radio" name="mode" value="${m.id}" class="peer sr-only" ${m.id === mode ? 'checked' : ''} />
-            <span class="flex min-h-11 items-center justify-center rounded-lg px-1 text-center text-sm font-medium text-slate-400 transition peer-checked:bg-gradient-to-r peer-checked:from-sky-500/30 peer-checked:to-violet-500/25 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400">${m.label}</span>
+            <span class="flex min-h-11 items-center justify-center rounded-lg px-1 text-center text-sm font-medium text-muted transition peer-checked:bg-gradient-to-r peer-checked:from-accent/15 peer-checked:to-accent/5 peer-checked:text-fg peer-focus-visible:ring-2 peer-focus-visible:ring-accent">${m.label}</span>
           </label>`)}
         </div>
         <div class="${mode === 'partial' ? '' : 'hidden'}" data-partial>
@@ -64,11 +64,11 @@ export function mountOrderEditor(container, { rows, initial = {}, submitLabel = 
             value="${mode === 'partial' ? groupThousands(initial.paid ?? 0) : ''}" />
         </div>
         <div class="flex items-baseline justify-between text-sm">
-          <span class="text-slate-400">Ghi nợ vào công nợ khách</span>
-          <span class="font-semibold text-amber-300 tabular-nums" data-debt>0 ₫</span>
+          <span class="text-muted">Ghi nợ vào công nợ khách</span>
+          <span class="font-semibold text-warn tabular-nums" data-debt>0 ₫</span>
         </div>
         <details class="group" ${initial.note || initial.orderDate ? 'open' : ''}>
-          <summary class="cursor-pointer list-none text-sm text-cyan-300 select-none">＋ Ghi chú, ngày giờ đơn</summary>
+          <summary class="cursor-pointer list-none text-sm text-accent-ink select-none">＋ Ghi chú, ngày giờ đơn</summary>
           <div class="mt-3 space-y-3">
             <div>
               <label class="field-label" for="order-note">Ghi chú</label>
@@ -112,7 +112,7 @@ export function mountOrderEditor(container, { rows, initial = {}, submitLabel = 
       err.classList.toggle('hidden', !q.error);
       err.textContent = q.error ?? '';
       $('[data-line-total]', li).textContent = q.value ? formatVND(lineTotal(q.value, price)) : '';
-      li.classList.toggle('bg-cyan-500/[0.06]', Boolean(q.value));
+      li.classList.toggle('bg-accent/[0.06]', Boolean(q.value));
     }
     const { total } = collect();
     $('[data-total]', form).textContent = formatVND(total);

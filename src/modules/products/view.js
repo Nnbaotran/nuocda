@@ -26,7 +26,7 @@ export function renderProducts(root) {
     html`<section class="space-y-4">
       <div class="flex flex-wrap items-center gap-3">
         <div class="relative min-w-0 flex-1 basis-56">
-          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-500">${icon('search', 'size-4')}</span>
+          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-subtle">${icon('search', 'size-4')}</span>
           <input class="input pl-9" type="search" placeholder="Tìm theo tên hoặc mã…" data-search aria-label="Tìm sản phẩm" />
         </div>
         <select class="input w-auto" data-status aria-label="Lọc trạng thái">
@@ -68,7 +68,7 @@ export function renderProducts(root) {
     owner
       ? html`<div class="flex justify-end gap-1">
           <button class="btn-icon" data-edit="${p.id}" aria-label="Sửa ${p.name}">${icon('edit')}</button>
-          <button class="btn-icon hover:text-rose-400" data-delete="${p.id}" aria-label="Xoá ${p.name}">${icon('trash')}</button>
+          <button class="btn-icon hover:text-bad" data-delete="${p.id}" aria-label="Xoá ${p.name}">${icon('trash')}</button>
         </div>`
       : '';
 
@@ -84,22 +84,22 @@ export function renderProducts(root) {
 
     setHtml(
       listEl,
-      html`<p class="mb-2 text-xs text-slate-500">${rows.length} sản phẩm</p>
+      html`<p class="mb-2 text-xs text-subtle">${rows.length} sản phẩm</p>
         <ul class="space-y-3 md:hidden">
           ${rows.map(
             (p) => html`<li class="card">
               <div class="flex items-start gap-3">
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-semibold text-white">${p.name}</p>
-                  <p class="text-xs text-slate-500">${p.sku || 'Chưa có mã'} · ${p.unit}</p>
+                  <p class="truncate font-semibold text-fg">${p.name}</p>
+                  <p class="text-xs text-subtle">${p.sku || 'Chưa có mã'} · ${p.unit}</p>
                 </div>
                 ${statusBadge(p)}
               </div>
               <div class="mt-3 flex items-center justify-between gap-3">
-                <p class="text-lg font-semibold text-cyan-300">${formatVND(p.price)}<span class="text-xs font-normal text-slate-500"> / ${p.unit}</span></p>
+                <p class="text-lg font-semibold text-accent-ink">${formatVND(p.price)}<span class="text-xs font-normal text-subtle"> / ${p.unit}</span></p>
                 ${actions(p)}
               </div>
-              ${p.note ? html`<p class="mt-2 text-sm text-slate-400">${p.note}</p>` : ''}
+              ${p.note ? html`<p class="mt-2 text-sm text-muted">${p.note}</p>` : ''}
             </li>`,
           )}
         </ul>
@@ -109,12 +109,12 @@ export function renderProducts(root) {
             <tbody>
               ${rows.map(
                 (p) => html`<tr>
-                  <td class="text-slate-400">${p.sku || '—'}</td>
-                  <td class="font-medium text-white">${p.name}</td>
+                  <td class="text-muted">${p.sku || '—'}</td>
+                  <td class="font-medium text-fg">${p.name}</td>
                   <td>${p.unit}</td>
-                  <td class="text-right font-semibold text-cyan-300 tabular-nums">${formatVND(p.price)}</td>
+                  <td class="text-right font-semibold text-accent-ink tabular-nums">${formatVND(p.price)}</td>
                   <td>${statusBadge(p)}</td>
-                  <td class="max-w-56 truncate text-slate-400" title="${p.note}">${p.note || '—'}</td>
+                  <td class="max-w-56 truncate text-muted" title="${p.note}">${p.note || '—'}</td>
                   ${owner ? html`<td>${actions(p)}</td>` : ''}
                 </tr>`,
               )}
@@ -159,8 +159,8 @@ export function renderProducts(root) {
           <textarea class="input" id="pf-note" name="note" rows="2" maxlength="${PRODUCT_LIMITS.noteMax}">${p.note ?? ''}</textarea>
           <p class="field-error hidden" data-error-for="note"></p>
         </div>
-        <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3">
-          <input type="checkbox" name="is_active" class="size-5 accent-cyan-400" ${p.is_active ? 'checked' : ''} />
+        <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-fg/10 bg-fg/[0.03] px-3">
+          <input type="checkbox" name="is_active" class="size-5 accent-accent" ${p.is_active ? 'checked' : ''} />
           <span>Đang bán</span>
         </label>
       </div>`,

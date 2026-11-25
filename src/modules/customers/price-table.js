@@ -5,18 +5,18 @@ import { bindMoneyInputs } from '../../lib/ui.js';
 
 export function priceTable(rows, { editable }) {
   if (!rows.length) {
-    return html`<p class="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-400">Chưa có sản phẩm nào trong kho. Hãy thêm sản phẩm trước.</p>`;
+    return html`<p class="rounded-xl border border-fg/10 bg-fg/[0.03] p-4 text-sm text-muted">Chưa có sản phẩm nào trong kho. Hãy thêm sản phẩm trước.</p>`;
   }
-  return html`<ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+  return html`<ul class="divide-y divide-fg/5 overflow-hidden rounded-2xl border border-fg/10 bg-surface/70">
     ${rows.map(
       (r) => html`<li class="flex items-center gap-3 px-4 py-3 ${r.is_active ? '' : 'opacity-60'}" data-row="${r.product_id}">
         <div class="min-w-0 flex-1">
-          <p class="truncate font-medium text-white">
+          <p class="truncate font-medium text-fg">
             ${r.name} ${r.is_active ? '' : html`<span class="badge-gray ml-1">Ngừng bán</span>`}
           </p>
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-subtle">
             Giá chung: ${formatVND(r.default_price)} / ${r.unit}
-            <span class="ml-1 text-cyan-300 ${r.price !== r.default_price ? '' : 'hidden'}" data-own-badge>· giá riêng</span>
+            <span class="ml-1 text-accent-ink ${r.price !== r.default_price ? '' : 'hidden'}" data-own-badge>· giá riêng</span>
           </p>
           <p class="field-error hidden" data-price-error="${r.product_id}"></p>
         </div>
@@ -26,7 +26,7 @@ export function priceTable(rows, { editable }) {
               <input class="input text-right font-semibold tabular-nums" id="price-${r.product_id}" inputmode="numeric" data-money
                 data-price-for="${r.product_id}" data-original="${r.price}" data-default="${r.default_price}" value="${groupThousands(r.price)}" />
             </div>`
-          : html`<p class="shrink-0 text-right font-semibold text-cyan-300 tabular-nums">${formatVND(r.price)}</p>`}
+          : html`<p class="shrink-0 text-right font-semibold text-accent-ink tabular-nums">${formatVND(r.price)}</p>`}
       </li>`,
     )}
   </ul>`;
@@ -42,7 +42,7 @@ export function bindPriceTable(container, onChange) {
       const v = parseMoney(input.value);
       const isChanged = v !== Number(input.dataset.original);
       if (isChanged) changed += 1;
-      input.classList.toggle('border-cyan-400/60', isChanged);
+      input.classList.toggle('border-accent/60', isChanged);
       const own = input.closest('[data-row]').querySelector('[data-own-badge]');
       own?.classList.toggle('hidden', v === null || v === Number(input.dataset.default));
     }

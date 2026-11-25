@@ -15,7 +15,7 @@ export function renderOrders(root) {
     root,
     html`<section class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-slate-400">Đơn được lên từ thẻ "Bán hàng" trong hồ sơ khách.</p>
+        <p class="text-sm text-muted">Đơn được lên từ thẻ "Bán hàng" trong hồ sơ khách.</p>
         <button class="btn-primary" data-new>${icon('plus', 'size-4')} Lên đơn</button>
       </div>
       <div data-range></div>
@@ -60,19 +60,19 @@ export function renderOrders(root) {
     const badge = (o) => html`<span class="${ORDER_STATUS[o.status].badge}">${ORDER_STATUS[o.status].label}</span>`;
     setHtml(
       listEl,
-      html`<p class="mb-2 text-xs text-slate-500">${rows.length} đơn${rows.length >= 500 ? ' (hiện 500 đơn mới nhất, hãy thu hẹp khoảng ngày)' : ''}</p>
+      html`<p class="mb-2 text-xs text-subtle">${rows.length} đơn${rows.length >= 500 ? ' (hiện 500 đơn mới nhất, hãy thu hẹp khoảng ngày)' : ''}</p>
       <ul class="space-y-2 md:hidden">
         ${rows.map(
           (o) => html`<li><a href="#/don-hang/${o.id}" class="card card-hover block p-3 ${o.status === 'cancelled' ? 'opacity-60' : ''}">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-semibold text-white">${o.code}</span>${badge(o)}
+              <span class="font-semibold text-fg">${o.code}</span>${badge(o)}
             </div>
-            <p class="mt-0.5 truncate text-sm text-slate-300">${o.customers?.name ?? ''}</p>
+            <p class="mt-0.5 truncate text-sm text-fg-2">${o.customers?.name ?? ''}</p>
             <div class="mt-1 flex items-end justify-between gap-2">
-              <span class="text-xs text-slate-500">${formatDateTime(o.order_date)}</span>
+              <span class="text-xs text-subtle">${formatDateTime(o.order_date)}</span>
               <span class="text-right">
-                <span class="block font-semibold tabular-nums ${o.status === 'cancelled' ? 'text-slate-500 line-through' : 'text-cyan-300'}">${formatVND(o.total)}</span>
-                ${debtOf(o) > 0 ? html`<span class="block text-xs text-amber-300">Ghi nợ ${formatVND(debtOf(o))}</span>` : ''}
+                <span class="block font-semibold tabular-nums ${o.status === 'cancelled' ? 'text-subtle line-through' : 'text-accent-ink'}">${formatVND(o.total)}</span>
+                ${debtOf(o) > 0 ? html`<span class="block text-xs text-warn">Ghi nợ ${formatVND(debtOf(o))}</span>` : ''}
               </span>
             </div>
           </a></li>`,
@@ -84,12 +84,12 @@ export function renderOrders(root) {
           <tbody>
             ${rows.map(
               (o) => html`<tr class="cursor-pointer ${o.status === 'cancelled' ? 'opacity-60 line-through' : ''}" data-href="#/don-hang/${o.id}">
-                <td><a class="font-semibold text-white hover:underline" href="#/don-hang/${o.id}">${o.code}</a></td>
-                <td class="text-slate-400">${formatDateTime(o.order_date)}</td>
+                <td><a class="font-semibold text-fg hover:underline" href="#/don-hang/${o.id}">${o.code}</a></td>
+                <td class="text-muted">${formatDateTime(o.order_date)}</td>
                 <td>${o.customers?.name ?? ''}</td>
-                <td class="text-right font-semibold text-cyan-300 tabular-nums">${formatVND(o.total)}</td>
+                <td class="text-right font-semibold text-accent-ink tabular-nums">${formatVND(o.total)}</td>
                 <td class="text-right tabular-nums">${formatVND(o.paid)}</td>
-                <td class="text-right tabular-nums ${debtOf(o) > 0 ? 'text-amber-300' : 'text-slate-500'}">${formatVND(debtOf(o))}</td>
+                <td class="text-right tabular-nums ${debtOf(o) > 0 ? 'text-warn' : 'text-subtle'}">${formatVND(debtOf(o))}</td>
                 <td>${badge(o)}</td>
               </tr>`,
             )}
@@ -114,8 +114,8 @@ export function renderOrders(root) {
       setHtml(
         opts,
         list.length
-          ? html`${list.map((c) => html`<li><a class="nav-link" href="#/khach-hang/${c.id}/ban-hang">${c.name}<span class="ml-auto text-xs text-slate-500">${c.phone}</span></a></li>`)}`
-          : html`<li class="px-3 py-6 text-center text-sm text-slate-500">Không có khách phù hợp. Thêm khách ở mục Khách hàng.</li>`,
+          ? html`${list.map((c) => html`<li><a class="nav-link" href="#/khach-hang/${c.id}/ban-hang">${c.name}<span class="ml-auto text-xs text-subtle">${c.phone}</span></a></li>`)}`
+          : html`<li class="px-3 py-6 text-center text-sm text-subtle">Không có khách phù hợp. Thêm khách ở mục Khách hàng.</li>`,
       );
     };
     $('[data-q]', el).addEventListener('input', (e) => paint(e.target.value));

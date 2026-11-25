@@ -8,7 +8,7 @@ import { bindMoneyInputs, emptyState, errorState, icon, loadingState, moneyValue
 import { cancelPayment, customerBalances, customerLedger, recordPayment } from '../orders/api.js';
 import { balanceLabel, buildLedger } from '../orders/logic.js';
 
-const TONE = { debt: 'text-amber-300', credit: 'text-emerald-300', clear: 'text-emerald-300' };
+const TONE = { debt: 'text-warn', credit: 'text-good', clear: 'text-good' };
 
 export function renderDebtTab(panel, { customer }) {
   let range = null;
@@ -19,7 +19,7 @@ export function renderDebtTab(panel, { customer }) {
     html`<div class="space-y-4">
       <div class="card flex flex-wrap items-center gap-3">
         <div class="min-w-0 flex-1">
-          <p class="text-sm text-slate-400">Công nợ hiện tại</p>
+          <p class="text-sm text-muted">Công nợ hiện tại</p>
           <p class="text-2xl font-bold tabular-nums" data-balance>…</p>
         </div>
         <button class="btn-primary" data-pay>${icon('wallet', 'size-4')} Khách trả nợ</button>
@@ -52,9 +52,9 @@ export function renderDebtTab(panel, { customer }) {
     }
   }
 
-  function card(label, value, cls = 'text-white') {
+  function card(label, value, cls = 'text-fg') {
     return html`<div class="card p-3">
-      <p class="text-xs text-slate-400">${label}</p>
+      <p class="text-xs text-muted">${label}</p>
       <p class="mt-1 text-lg font-bold tabular-nums ${cls}">${value}</p>
     </div>`;
   }
@@ -66,29 +66,29 @@ export function renderDebtTab(panel, { customer }) {
       html`<div class="space-y-4">
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
           ${card('Nợ đầu kỳ', money(l.opening))}
-          ${card('Phát sinh tăng', `+${formatVND(l.increase)}`, 'text-amber-300')}
-          ${card('Phát sinh giảm', `−${formatVND(l.decrease)}`, 'text-emerald-300')}
-          ${card('Nợ cuối kỳ', money(l.closing), 'gradient-text')}
+          ${card('Phát sinh tăng', `+${formatVND(l.increase)}`, 'text-warn')}
+          ${card('Phát sinh giảm', `−${formatVND(l.decrease)}`, 'text-good')}
+          ${card('Nợ cuối kỳ', money(l.closing), l.closing > 0 ? 'text-warn' : 'text-good')}
         </div>
         ${l.rows.length === 0
           ? emptyState('Không có phát sinh trong khoảng ngày này')
-          : html`<ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+          : html`<ul class="divide-y divide-fg/5 overflow-hidden rounded-2xl border border-fg/10 bg-surface/70">
               ${l.rows.map(
                 (r) => html`<li class="flex items-start gap-3 px-4 py-3">
                   <div class="min-w-0 flex-1">
-                    <p class="text-xs text-slate-500">${formatDateStr(r.date)}</p>
+                    <p class="text-xs text-subtle">${formatDateStr(r.date)}</p>
                     ${r.kind === 'order'
-                      ? html`<p class="font-medium text-white">Đơn <a class="text-cyan-300 hover:underline" href="#/don-hang/${r.id}">${r.code}</a></p>
-                          <p class="text-xs text-slate-500">Tổng ${formatVND(r.total)} · đã trả ${formatVND(r.paid)}</p>`
-                      : html`<p class="font-medium text-white">Khách trả nợ</p>
-                          ${r.note ? html`<p class="text-xs text-slate-500">${r.note}</p>` : ''}`}
+                      ? html`<p class="font-medium text-fg">Đơn <a class="text-accent-ink hover:underline" href="#/don-hang/${r.id}">${r.code}</a></p>
+                          <p class="text-xs text-subtle">Tổng ${formatVND(r.total)} · đã trả ${formatVND(r.paid)}</p>`
+                      : html`<p class="font-medium text-fg">Khách trả nợ</p>
+                          ${r.note ? html`<p class="text-xs text-subtle">${r.note}</p>` : ''}`}
                   </div>
                   <div class="text-right">
-                    <p class="font-semibold tabular-nums ${r.increase ? 'text-amber-300' : 'text-emerald-300'}">
+                    <p class="font-semibold tabular-nums ${r.increase ? 'text-warn' : 'text-good'}">
                       ${r.increase ? `+${formatVND(r.increase)}` : `−${formatVND(r.decrease)}`}
                     </p>
-                    <p class="text-xs text-slate-500 tabular-nums">Dư: ${money(r.balance)}</p>
-                    ${r.kind === 'payment' ? html`<button class="mt-1 text-xs text-rose-300 hover:underline" data-cancel-pay="${r.id}" data-amount="${r.decrease}">Huỷ phiếu</button>` : ''}
+                    <p class="text-xs text-subtle tabular-nums">Dư: ${money(r.balance)}</p>
+                    ${r.kind === 'payment' ? html`<button class="mt-1 text-xs text-bad hover:underline" data-cancel-pay="${r.id}" data-amount="${r.decrease}">Huỷ phiếu</button>` : ''}
                   </div>
                 </li>`,
               )}
@@ -103,7 +103,7 @@ export function renderDebtTab(panel, { customer }) {
       title: 'Ghi nhận khách trả nợ',
       submitLabel: 'Lưu',
       body: html`<div class="space-y-4">
-        <p class="text-sm text-slate-400">${customer.name} – ${balanceLabel(balance).text}</p>
+        <p class="text-sm text-muted">${customer.name} – ${balanceLabel(balance).text}</p>
         <div>
           <label class="field-label" for="pay-amount">Số tiền trả (₫) *</label>
           <div class="flex gap-2">

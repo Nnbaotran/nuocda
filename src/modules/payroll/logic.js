@@ -2,10 +2,10 @@
 // Database (payroll_preview) là nơi tính chính thức; phần này cho số hiện ngay và phải KHỚP database.
 
 export const ATT_STATUS = {
-  present: { label: 'Đi làm', short: 'X', units: 1, cls: 'bg-emerald-500/20 text-emerald-200 ring-emerald-400/40' },
-  half: { label: 'Nửa ngày', short: '½', units: 0.5, cls: 'bg-cyan-500/20 text-cyan-200 ring-cyan-400/40' },
-  absent: { label: 'Nghỉ', short: 'N', units: 0, cls: 'bg-rose-500/15 text-rose-200 ring-rose-400/30' },
-  leave: { label: 'Nghỉ phép', short: 'P', units: 0, cls: 'bg-violet-500/20 text-violet-200 ring-violet-400/40' },
+  present: { label: 'Đi làm', short: 'X', units: 1, cls: 'bg-emerald-500/15 text-good ring-emerald-500/40' },
+  half: { label: 'Nửa ngày', short: '½', units: 0.5, cls: 'bg-sky-500/15 text-cool ring-sky-500/40' },
+  absent: { label: 'Nghỉ', short: 'N', units: 0, cls: 'bg-rose-500/12 text-bad ring-rose-500/35' },
+  leave: { label: 'Nghỉ phép', short: 'P', units: 0, cls: 'bg-violet-500/15 text-info ring-violet-500/40' },
 };
 export const ATT_ORDER = ['present', 'half', 'absent', 'leave'];
 

@@ -1,17 +1,18 @@
 import { APP_NAME } from '../../config.js';
 import { $, html, setHtml } from '../../lib/dom.js';
-import { icon } from '../../lib/ui.js';
+import { icon, themeToggle } from '../../lib/ui.js';
 import { signIn } from './session.js';
 
 export function renderLogin(root, { notice } = {}) {
   setHtml(
     root,
-    html`<main class="flex min-h-dvh items-center justify-center px-4 py-10">
+    html`<main class="relative flex min-h-dvh items-center justify-center px-4 py-10">
+      <div class="absolute top-3 right-3">${themeToggle()}</div>
       <div class="fade-in w-full max-w-sm">
         <div class="mb-8 text-center">
-          <img src="/assets/favicon.svg" alt="" class="mx-auto mb-4 size-16 drop-shadow-[0_0_24px_rgba(34,211,238,0.35)]" />
+          <img src="/assets/favicon.svg" alt="" class="mx-auto mb-4 size-16 drop-shadow-[0_0_24px_rgba(239,60,77,0.35)]" />
           <h1 class="gradient-text text-3xl font-bold tracking-tight">${APP_NAME}</h1>
-          <p class="mt-2 text-sm text-slate-400">Đăng nhập để tiếp tục</p>
+          <p class="mt-2 text-sm text-muted">Đăng nhập để tiếp tục</p>
         </div>
         <form class="card space-y-4 p-5" novalidate>
           <p class="form-error ${notice ? '' : 'hidden'}" data-form-error>${notice ?? ''}</p>
@@ -27,7 +28,7 @@ export function renderLogin(root, { notice } = {}) {
             </div>
           </div>
           <button type="submit" class="btn-primary w-full">Đăng nhập</button>
-          <p class="text-center text-xs text-slate-500">Quên mật khẩu? Đặt lại trong Supabase › Authentication › Users.</p>
+          <p class="text-center text-xs text-subtle">Quên mật khẩu? Đặt lại trong Supabase › Authentication › Users.</p>
         </form>
       </div>
     </main>`,

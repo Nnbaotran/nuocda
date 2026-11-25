@@ -85,11 +85,11 @@ function openFirstPrices(info, products, onCreated) {
     submitLabel: 'Lưu & tạo hồ sơ',
     wide: true,
     body: html`<div class="space-y-3">
-      <p class="text-sm text-slate-400">
-        Giá riêng cho <strong class="text-white">${info.name}</strong>. Đã điền sẵn giá chung, chỉ cần sửa sản phẩm có giá khác.
+      <p class="text-sm text-muted">
+        Giá riêng cho <strong class="text-fg">${info.name}</strong>. Đã điền sẵn giá chung, chỉ cần sửa sản phẩm có giá khác.
       </p>
       <div data-prices>${priceTable(rows, { editable: true })}</div>
-      <button type="button" class="text-sm text-cyan-300 underline-offset-4 hover:underline" data-back>← Quay lại sửa thông tin</button>
+      <button type="button" class="text-sm text-accent-ink underline-offset-4 hover:underline" data-back>← Quay lại sửa thông tin</button>
     </div>`,
     onSubmit: async () => {
       const box = el.querySelector('[data-prices]');

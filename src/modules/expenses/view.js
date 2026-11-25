@@ -45,23 +45,23 @@ export function renderExpenses(root) {
       listEl,
       html`<div class="space-y-4">
         <div class="card">
-          <p class="text-sm text-slate-400">Tổng chi phí (${items.length} khoản)</p>
-          <p class="text-2xl font-bold text-white tabular-nums">${formatVND(total)}</p>
+          <p class="text-sm text-muted">Tổng chi phí (${items.length} khoản)</p>
+          <p class="text-2xl font-bold text-fg tabular-nums">${formatVND(total)}</p>
           ${byCat.length > 1
             ? html`<ul class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-3">
-                ${byCat.map((c) => html`<li class="flex justify-between gap-2"><span class="text-slate-400">${c.label}</span><span class="tabular-nums">${formatVND(c.amount)}</span></li>`)}
+                ${byCat.map((c) => html`<li class="flex justify-between gap-2"><span class="text-muted">${c.label}</span><span class="tabular-nums">${formatVND(c.amount)}</span></li>`)}
               </ul>`
             : ''}
         </div>
-        <ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+        <ul class="divide-y divide-fg/5 overflow-hidden rounded-2xl border border-fg/10 bg-surface/70">
           ${items.map((e) => html`<li class="flex items-center gap-3 px-4 py-3">
             <div class="min-w-0 flex-1">
-              <p class="font-medium text-white">${EXPENSE_CATEGORIES[e.category]}</p>
-              <p class="truncate text-xs text-slate-500">${formatDateStr(e.expense_date)}${e.note ? ` · ${e.note}` : ''}</p>
+              <p class="font-medium text-fg">${EXPENSE_CATEGORIES[e.category]}</p>
+              <p class="truncate text-xs text-subtle">${formatDateStr(e.expense_date)}${e.note ? ` · ${e.note}` : ''}</p>
             </div>
-            <p class="font-semibold text-white tabular-nums">${formatVND(e.amount)}</p>
+            <p class="font-semibold text-fg tabular-nums">${formatVND(e.amount)}</p>
             <button class="btn-icon" data-edit="${e.id}" aria-label="Sửa khoản chi">${icon('edit', 'size-4')}</button>
-            <button class="btn-icon hover:text-rose-400" data-delete="${e.id}" aria-label="Xoá khoản chi">${icon('trash', 'size-4')}</button>
+            <button class="btn-icon hover:text-bad" data-delete="${e.id}" aria-label="Xoá khoản chi">${icon('trash', 'size-4')}</button>
           </li>`)}
         </ul>
       </div>`,

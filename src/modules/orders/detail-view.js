@@ -32,7 +32,7 @@ export function renderOrderDetail(root, { params }) {
   let order = null;
 
   setHtml(root, html`<section class="space-y-4">
-    <a href="#/don-hang" class="inline-flex min-h-11 items-center gap-1 text-sm text-slate-400 hover:text-white">‹ Danh sách đơn</a>
+    <a href="#/don-hang" class="inline-flex min-h-11 items-center gap-1 text-sm text-muted hover:text-fg">‹ Danh sách đơn</a>
     <div data-body>${loadingState(3)}</div>
   </section>`);
   const section = $('section', root);
@@ -58,18 +58,18 @@ export function renderOrderDetail(root, { params }) {
         <div class="card">
           <div class="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 class="text-xl font-bold text-white">${o.code}</h2>
-              <p class="text-sm text-slate-400">${formatDateTime(o.order_date)}</p>
-              <a class="mt-1 inline-block text-cyan-300 hover:underline" href="#/khach-hang/${o.customer_id}/cong-no">${o.customers?.name ?? ''}</a>
+              <h2 class="text-xl font-bold text-fg">${o.code}</h2>
+              <p class="text-sm text-muted">${formatDateTime(o.order_date)}</p>
+              <a class="mt-1 inline-block text-accent-ink hover:underline" href="#/khach-hang/${o.customer_id}/cong-no">${o.customers?.name ?? ''}</a>
             </div>
             <span class="${ORDER_STATUS[o.status].badge}">${ORDER_STATUS[o.status].label}</span>
           </div>
-          ${!active ? html`<p class="mt-3 rounded-xl bg-white/5 px-3 py-2 text-sm text-slate-300">Đã huỷ lúc ${formatDateTime(o.cancelled_at)}${o.cancel_reason ? ` – ${o.cancel_reason}` : ''}. Đơn không còn tính vào doanh thu và công nợ.</p>` : ''}
-          ${o.note ? html`<p class="mt-3 text-sm text-slate-400 italic">${o.note}</p>` : ''}
+          ${!active ? html`<p class="mt-3 rounded-xl bg-fg/5 px-3 py-2 text-sm text-fg-2">Đã huỷ lúc ${formatDateTime(o.cancelled_at)}${o.cancel_reason ? ` – ${o.cancel_reason}` : ''}. Đơn không còn tính vào doanh thu và công nợ.</p>` : ''}
+          ${o.note ? html`<p class="mt-3 text-sm text-muted italic">${o.note}</p>` : ''}
           ${active
             ? html`<div class="mt-4 flex gap-2">
                 <button class="btn-secondary flex-1" data-edit>${icon('edit', 'size-4')} Sửa đơn</button>
-                <button class="btn-secondary flex-1 hover:text-rose-300" data-cancel>${icon('x', 'size-4')} Huỷ đơn</button>
+                <button class="btn-secondary flex-1 hover:text-bad" data-cancel>${icon('x', 'size-4')} Huỷ đơn</button>
               </div>`
             : html`<div class="mt-4">
                 <button class="btn-danger w-full" data-delete>${icon('trash', 'size-4')} Xoá khỏi lịch sử đơn hàng</button>
@@ -81,7 +81,7 @@ export function renderOrderDetail(root, { params }) {
             <thead><tr><th>Sản phẩm</th><th class="text-right">SL</th><th class="text-right">Đơn giá</th><th class="text-right">Thành tiền</th></tr></thead>
             <tbody>
               ${o.items.map((i) => html`<tr>
-                <td class="font-medium text-white">${i.product_name} <span class="text-xs text-slate-500">/ ${i.unit}</span></td>
+                <td class="font-medium text-fg">${i.product_name} <span class="text-xs text-subtle">/ ${i.unit}</span></td>
                 <td class="text-right tabular-nums">${qtyText(i.quantity)}</td>
                 <td class="text-right tabular-nums">${formatVND(i.unit_price)}</td>
                 <td class="text-right font-semibold tabular-nums">${formatVND(i.line_total)}</td>
@@ -91,19 +91,19 @@ export function renderOrderDetail(root, { params }) {
         </div>
 
         <div class="card space-y-2">
-          <div class="flex justify-between"><span class="text-slate-400">Tổng tiền</span><span class="text-lg font-bold text-white tabular-nums">${formatVND(o.total)}</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Khách đã trả lúc mua</span><span class="tabular-nums">${formatVND(o.paid)}</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Ghi nợ</span><span class="font-semibold tabular-nums ${debt > 0 ? 'text-amber-300' : 'text-emerald-300'}">${formatVND(debt)}</span></div>
-          <p class="text-xs text-slate-500">Khách trả nợ sau đó được ghi chung ở thẻ "Công nợ" của khách.</p>
+          <div class="flex justify-between"><span class="text-muted">Tổng tiền</span><span class="text-lg font-bold text-fg tabular-nums">${formatVND(o.total)}</span></div>
+          <div class="flex justify-between"><span class="text-muted">Khách đã trả lúc mua</span><span class="tabular-nums">${formatVND(o.paid)}</span></div>
+          <div class="flex justify-between"><span class="text-muted">Ghi nợ</span><span class="font-semibold tabular-nums ${debt > 0 ? 'text-warn' : 'text-good'}">${formatVND(debt)}</span></div>
+          <p class="text-xs text-subtle">Khách trả nợ sau đó được ghi chung ở thẻ "Công nợ" của khách.</p>
         </div>
 
         ${o.logs.length
           ? html`<div class="card">
-              <h3 class="mb-2 font-semibold text-white">Lịch sử thay đổi</h3>
+              <h3 class="mb-2 font-semibold text-fg">Lịch sử thay đổi</h3>
               <ul class="space-y-2 text-sm">
-                ${o.logs.map((l) => html`<li class="border-l-2 border-cyan-400/40 pl-3">
-                  <p class="text-xs text-slate-500">${formatDateTime(l.created_at)}</p>
-                  <p class="text-slate-300">${describeLog(l)}</p>
+                ${o.logs.map((l) => html`<li class="border-l-2 border-accent/40 pl-3">
+                  <p class="text-xs text-subtle">${formatDateTime(l.created_at)}</p>
+                  <p class="text-fg-2">${describeLog(l)}</p>
                 </li>`)}
               </ul>
             </div>`

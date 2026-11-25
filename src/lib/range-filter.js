@@ -16,10 +16,10 @@ export function mountRangeFilter(container, { initial = 'month', onChange }) {
         )}
       </div>
       <div class="hidden grid-cols-2 gap-2" data-custom>
-        <label class="text-xs text-slate-400">Từ ngày
+        <label class="text-xs text-muted">Từ ngày
           <input type="date" class="input mt-1" data-from max="${today}" />
         </label>
-        <label class="text-xs text-slate-400">Đến ngày
+        <label class="text-xs text-muted">Đến ngày
           <input type="date" class="input mt-1" data-to max="${today}" />
         </label>
         <p class="field-error col-span-2 hidden" data-range-error></p>
@@ -36,7 +36,7 @@ export function mountRangeFilter(container, { initial = 'month', onChange }) {
     for (const b of $$('[data-preset]', container)) {
       const on = b.dataset.preset === current.preset;
       b.className = `min-h-10 shrink-0 rounded-full border px-3.5 text-sm font-medium transition ${
-        on ? 'border-cyan-400/50 bg-cyan-500/15 text-white' : 'border-white/10 bg-white/[0.03] text-slate-400 hover:text-white'
+        on ? 'border-accent/50 bg-accent/15 text-fg' : 'border-fg/10 bg-fg/[0.03] text-muted hover:text-fg'
       }`;
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
