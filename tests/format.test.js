@@ -40,3 +40,11 @@ test('formatDate/formatDateTime: dd/mm/yyyy theo giờ Việt Nam', () => {
   assert.equal(formatDate('2026-01-05T03:00:00Z'), '05/01/2026');
   assert.equal(formatDate('không phải ngày'), '');
 });
+
+import { formatQty, formatSignedVND } from '../src/lib/format.js';
+test('formatQty / formatSignedVND', () => {
+  assert.equal(formatQty(2.5), '2,5');
+  assert.equal(formatQty('10.00'), '10');
+  assert.equal(formatSignedVND(-100000), '−100.000 ₫');
+  assert.equal(formatSignedVND(5000), '5.000 ₫');
+});

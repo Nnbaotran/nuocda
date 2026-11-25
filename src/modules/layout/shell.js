@@ -8,7 +8,6 @@ function navLinks(routes) {
   return routes.map(
     (r) => html`<a href="#${r.path}" class="nav-link" data-path="${r.path}">
       ${icon(r.icon)}<span class="flex-1">${r.label}</span>
-      ${r.phase ? html`<span class="badge-gray">Sắp có</span>` : ''}
     </a>`,
   );
 }

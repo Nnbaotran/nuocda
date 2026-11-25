@@ -176,6 +176,15 @@ export function promptReason({ title, message, confirmLabel = 'Đồng ý', plac
   });
 }
 
+/** Thẻ số liệu (dùng ở Công nợ, Báo cáo): nhãn + số lớn + dòng phụ tuỳ chọn. */
+export function statCard(label, value, { sub = '', cls = 'text-fg' } = {}) {
+  return html`<div class="card p-3">
+    <p class="text-xs text-muted">${label}</p>
+    <p class="mt-1 text-xl font-bold tabular-nums ${cls}">${value}</p>
+    ${sub ? html`<p class="mt-0.5 text-xs text-subtle">${sub}</p>` : ''}
+  </div>`;
+}
+
 // ---- Trạng thái tải / trống / lỗi --------------------------------------
 export function loadingState(rows = 3) {
   return html`<div class="space-y-3" aria-busy="true" aria-label="Đang tải">
