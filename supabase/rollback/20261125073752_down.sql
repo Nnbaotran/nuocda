@@ -1,4 +1,4 @@
--- Quay lui 20261125074000_single_owner_only: cho tài khoản đang hoạt động (kể cả STAFF) xem lại dữ liệu.
+-- Quay lui 20261125073752_single_owner_only: cho tài khoản đang hoạt động (kể cả STAFF) xem lại dữ liệu.
 drop policy if exists "products_select_owner" on public.products;
 create policy "products_select_active_users" on public.products
   for select to authenticated using ((select public.is_active_user()));

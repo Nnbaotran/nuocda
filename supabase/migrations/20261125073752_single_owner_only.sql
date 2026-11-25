@@ -1,7 +1,7 @@
 -- Đổi yêu cầu (25/11/2026): app chỉ có MỘT tài khoản là Chủ. Nhân viên không đăng nhập
 -- (chỉ là danh sách để chấm công, làm ở giai đoạn 4).
 -- => Mọi dữ liệu kinh doanh chỉ Chủ được xem. Tài khoản lạ (nếu ai đó tự đăng ký) không thấy gì.
--- Quay lui: supabase/rollback/20261125074000_down.sql
+-- Quay lui: supabase/rollback/20261125073752_down.sql
 
 drop policy "products_select_active_users" on public.products;
 create policy "products_select_owner" on public.products
