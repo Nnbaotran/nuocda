@@ -21,7 +21,7 @@ export function renderCustomerDetail(root, { params }) {
   const state = { customer: null, rows: [], tab: TABS.some((t) => t.id === params.tab) ? params.tab : 'gia-ban', dirty: 0 };
 
   setHtml(root, html`<section class="space-y-4">
-    <a href="#/khach-hang" class="inline-flex min-h-11 items-center gap-1 text-sm text-slate-400 hover:text-white">‹ Danh sách khách</a>
+    <a href="#/khach-hang" class="inline-flex min-h-11 items-center gap-1 text-sm text-muted hover:text-fg">‹ Danh sách khách</a>
     <div data-body>${loadingState(2)}</div>
   </section>`);
   const section = $('section', root);
@@ -42,14 +42,14 @@ export function renderCustomerDetail(root, { params }) {
 
   function header(c) {
     return html`<div class="card relative overflow-hidden">
-      <div class="pointer-events-none absolute -top-20 -right-12 size-48 rounded-full bg-cyan-500/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -top-20 -right-12 size-48 rounded-full bg-accent/15 blur-3xl"></div>
       <div class="flex items-start gap-3">
         <div class="min-w-0 flex-1">
-          <h2 class="text-xl font-bold text-white">${c.name}</h2>
-          <div class="mt-1 space-y-0.5 text-sm text-slate-400">
-            ${c.phone ? html`<p><a class="text-cyan-300 hover:underline" href="tel:${c.phone.replace(/[^0-9+]/g, '')}">${c.phone}</a></p>` : ''}
+          <h2 class="text-xl font-bold text-fg">${c.name}</h2>
+          <div class="mt-1 space-y-0.5 text-sm text-muted">
+            ${c.phone ? html`<p><a class="text-accent-ink hover:underline" href="tel:${c.phone.replace(/[^0-9+]/g, '')}">${c.phone}</a></p>` : ''}
             ${c.address ? html`<p>${c.address}</p>` : ''}
-            ${c.note ? html`<p class="text-slate-500 italic">${c.note}</p>` : ''}
+            ${c.note ? html`<p class="text-subtle italic">${c.note}</p>` : ''}
           </div>
         </div>
         ${c.is_active ? html`<span class="badge-green">Đang giao dịch</span>` : html`<span class="badge-gray">Ngừng giao dịch</span>`}
@@ -57,7 +57,7 @@ export function renderCustomerDetail(root, { params }) {
       <div class="mt-4 flex flex-wrap gap-2">
         <button class="btn-secondary flex-1" data-edit>${icon('edit', 'size-4')} Sửa</button>
         <button class="btn-secondary flex-1" data-toggle>${c.is_active ? 'Ngừng giao dịch' : 'Giao dịch lại'}</button>
-        <button class="btn-secondary hover:text-rose-300" data-delete aria-label="Xoá hồ sơ">${icon('trash', 'size-4')}</button>
+        <button class="btn-secondary hover:text-bad" data-delete aria-label="Xoá hồ sơ">${icon('trash', 'size-4')}</button>
       </div>
     </div>`;
   }
@@ -65,11 +65,11 @@ export function renderCustomerDetail(root, { params }) {
   function tabPanel() {
     if (state.tab === 'gia-ban') {
       return html`<div class="space-y-3">
-        <p class="text-sm text-slate-400">Giá riêng của khách này. Đổi ở đây không ảnh hưởng khách khác hay giá chung.</p>
+        <p class="text-sm text-muted">Giá riêng của khách này. Đổi ở đây không ảnh hưởng khách khác hay giá chung.</p>
         <div data-prices>${priceTable(state.rows, { editable: true })}</div>
         <div class="sticky bottom-20 z-10 hidden md:bottom-4" data-savebar>
-          <div class="flex items-center gap-3 rounded-2xl border border-cyan-400/30 bg-ink-850/95 p-3 shadow-xl shadow-black/40 backdrop-blur">
-            <p class="flex-1 text-sm text-cyan-200" data-dirty-text></p>
+          <div class="flex items-center gap-3 rounded-2xl border border-accent/30 bg-field/95 p-3 shadow-xl shadow-black/40 backdrop-blur">
+            <p class="flex-1 text-sm text-accent-ink" data-dirty-text></p>
             <button class="btn-secondary" data-undo>Hoàn tác</button>
             <button class="btn-primary" data-save>Lưu giá</button>
           </div>
@@ -83,8 +83,8 @@ export function renderCustomerDetail(root, { params }) {
     const c = state.customer;
     setHtml(body, html`<div class="space-y-4">
       ${header(c)}
-      <div class="flex gap-1 rounded-2xl border border-white/10 bg-ink-900/70 p-1" role="tablist" aria-label="Thẻ hồ sơ khách">
-        ${TABS.map((t) => html`<button role="tab" class="min-h-11 flex-1 rounded-xl text-sm font-medium transition ${t.id === state.tab ? 'bg-gradient-to-r from-sky-500/25 to-violet-500/20 text-white ring-1 ring-cyan-400/30' : 'text-slate-400 hover:text-white'}" aria-selected="${t.id === state.tab ? 'true' : 'false'}" data-tab="${t.id}">${t.label}</button>`)}
+      <div class="flex gap-1 rounded-2xl border border-fg/10 bg-surface/70 p-1" role="tablist" aria-label="Thẻ hồ sơ khách">
+        ${TABS.map((t) => html`<button role="tab" class="min-h-11 flex-1 rounded-xl text-sm font-medium transition ${t.id === state.tab ? 'bg-gradient-to-r from-accent/15 to-accent/5 text-fg ring-1 ring-accent/30' : 'text-muted hover:text-fg'}" aria-selected="${t.id === state.tab ? 'true' : 'false'}" data-tab="${t.id}">${t.label}</button>`)}
       </div>
       <div class="fade-in" role="tabpanel" data-panel>${tabPanel()}</div>
     </div>`);

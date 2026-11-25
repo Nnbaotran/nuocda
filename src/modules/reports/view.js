@@ -24,8 +24,8 @@ export function renderReports(root) {
     root,
     html`<section class="space-y-4">
       <div data-range></div>
-      <label class="flex min-h-11 items-center gap-2 text-sm text-slate-300">
-        <input type="checkbox" class="size-5 accent-cyan-400" data-payroll checked /> Tính lương nhân viên (đã chốt) vào chi phí
+      <label class="flex min-h-11 items-center gap-2 text-sm text-fg-2">
+        <input type="checkbox" class="size-5 accent-accent" data-payroll checked /> Tính lương nhân viên (đã chốt) vào chi phí
       </label>
       <div data-body>${loadingState(3)}</div>
     </section>`,
@@ -43,11 +43,11 @@ export function renderReports(root) {
     }
   }
 
-  function card(label, value, sub = '', valueCls = 'text-white') {
+  function card(label, value, sub = '', valueCls = 'text-fg') {
     return html`<div class="card p-3">
-      <p class="text-xs text-slate-400">${label}</p>
+      <p class="text-xs text-muted">${label}</p>
       <p class="mt-1 text-xl font-bold tabular-nums ${valueCls}">${value}</p>
-      ${sub ? html`<p class="mt-0.5 text-xs text-slate-500">${sub}</p>` : ''}
+      ${sub ? html`<p class="mt-0.5 text-xs text-subtle">${sub}</p>` : ''}
     </div>`;
   }
 
@@ -59,20 +59,20 @@ export function renderReports(root) {
     setHtml(
       body,
       html`<div class="space-y-4">
-        <p class="text-xs text-slate-500">Từ ${formatDateStr(d.range.from)} đến ${formatDateStr(d.range.to)}</p>
+        <p class="text-xs text-subtle">Từ ${formatDateStr(d.range.from)} đến ${formatDateStr(d.range.to)}</p>
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
           ${card('Doanh thu', formatVND(s.revenue), `${s.order_count} đơn · đã thu ${formatVND(s.collected)}`)}
           ${card('Chi phí', formatVND(cost), state.includePayroll ? `chi ${formatVND(s.expenses)} + lương ${formatVND(s.payroll)}` : 'chưa gồm lương')}
-          ${card('Lợi nhuận', signed(s.profit), s.profit < 0 ? 'Lỗ' : 'Doanh thu − chi phí', s.profit < 0 ? 'text-rose-300' : 'gradient-text')}
-          ${card('Công nợ phải thu', formatVND(s.receivable), `tính đến ${formatDateStr(d.range.to)}`, 'text-amber-300')}
+          ${card('Lợi nhuận', signed(s.profit), s.profit < 0 ? 'Lỗ' : 'Doanh thu − chi phí', s.profit < 0 ? 'text-bad' : 'text-good')}
+          ${card('Công nợ phải thu', formatVND(s.receivable), `tính đến ${formatDateStr(d.range.to)}`, 'text-warn')}
         </div>
         ${open.length
-          ? html`<p class="rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+          ? html`<p class="rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-warn">
               Lương ${open.map((m) => monthLabel(m).toLowerCase()).join(', ')} chưa chốt nên chưa tính vào chi phí.</p>`
           : ''}
-        <div class="flex gap-1 rounded-2xl border border-white/10 bg-ink-900/70 p-1" role="tablist">
+        <div class="flex gap-1 rounded-2xl border border-fg/10 bg-surface/70 p-1" role="tablist">
           ${TABS.map((t) => html`<button role="tab" data-tab="${t.id}" aria-selected="${t.id === state.tab ? 'true' : 'false'}"
-            class="min-h-11 flex-1 rounded-xl text-sm font-medium transition ${t.id === state.tab ? 'bg-gradient-to-r from-sky-500/25 to-violet-500/20 text-white ring-1 ring-cyan-400/30' : 'text-slate-400 hover:text-white'}">${t.label}</button>`)}
+            class="min-h-11 flex-1 rounded-xl text-sm font-medium transition ${t.id === state.tab ? 'bg-gradient-to-r from-accent/15 to-accent/5 text-fg ring-1 ring-accent/30' : 'text-muted hover:text-fg'}">${t.label}</button>`)}
         </div>
         <div class="fade-in" data-panel></div>
       </div>`,
@@ -93,7 +93,7 @@ export function renderReports(root) {
     const long = (k) => bucketLabel(k, true);
     setHtml(panel, html`<div class="space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <p class="text-sm text-slate-400">Theo ${d.granularity === 'day' ? 'ngày' : 'tháng'}</p>
+        <p class="text-sm text-muted">Theo ${d.granularity === 'day' ? 'ngày' : 'tháng'}</p>
         <div class="flex gap-2">
           <button class="btn-secondary min-h-10" data-toggle-table>${state.asTable ? 'Xem biểu đồ' : 'Xem dạng bảng'}</button>
           ${exportBtn('total')}
@@ -103,7 +103,7 @@ export function renderReports(root) {
         ? html`<div class="table-wrap overflow-x-auto"><table class="table">
             <thead><tr><th>${d.granularity === 'day' ? 'Ngày' : 'Tháng'}</th><th class="text-right">Doanh thu</th><th class="text-right">Chi phí</th><th class="text-right">Lợi nhuận</th></tr></thead>
             <tbody>${series.map((p) => html`<tr><td>${long(p.key)}</td><td class="text-right tabular-nums">${formatVND(p.revenue)}</td>
-              <td class="text-right tabular-nums">${formatVND(p.cost)}</td><td class="text-right tabular-nums ${p.profit < 0 ? 'text-rose-300' : ''}">${signed(p.profit)}</td></tr>`)}</tbody>
+              <td class="text-right tabular-nums">${formatVND(p.cost)}</td><td class="text-right tabular-nums ${p.profit < 0 ? 'text-bad' : ''}">${signed(p.profit)}</td></tr>`)}</tbody>
           </table></div>`
         : html`<div class="card" data-chart></div>`}
     </div>`);
@@ -130,14 +130,14 @@ export function renderReports(root) {
       <div class="table-wrap overflow-x-auto"><table class="table">
         <thead><tr><th>Khách</th><th class="text-right">Số đơn</th><th class="text-right">Doanh thu</th><th class="text-right">Đã thu</th><th class="text-right">Còn nợ</th></tr></thead>
         <tbody>${rows.map((c) => html`<tr>
-          <td><a class="font-medium text-white hover:underline" href="#/khach-hang/${c.id}/cong-no">${c.name}</a></td>
+          <td><a class="font-medium text-fg hover:underline" href="#/khach-hang/${c.id}/cong-no">${c.name}</a></td>
           <td class="text-right tabular-nums">${c.order_count}</td>
           <td class="text-right font-semibold tabular-nums">${formatVND(c.revenue)}</td>
           <td class="text-right tabular-nums">${formatVND(c.collected)}</td>
-          <td class="text-right tabular-nums ${c.debt > 0 ? 'text-amber-300' : c.debt < 0 ? 'text-emerald-300' : 'text-slate-500'}">${signed(c.debt)}</td>
+          <td class="text-right tabular-nums ${c.debt > 0 ? 'text-warn' : c.debt < 0 ? 'text-good' : 'text-subtle'}">${signed(c.debt)}</td>
         </tr>`)}</tbody>
       </table></div>
-      <p class="text-xs text-slate-500">Còn nợ tính đến ${formatDateStr(state.data.range.to)}; số âm là khách trả dư.</p>
+      <p class="text-xs text-subtle">Còn nợ tính đến ${formatDateStr(state.data.range.to)}; số âm là khách trả dư.</p>
     </div>`);
   }
 
@@ -150,10 +150,10 @@ export function renderReports(root) {
       <div class="table-wrap overflow-x-auto"><table class="table">
         <thead><tr><th>Sản phẩm</th><th class="text-right">Số lượng bán</th><th class="text-right">Doanh thu</th><th class="text-right">Tỷ trọng</th></tr></thead>
         <tbody>${rows.map((p) => html`<tr>
-          <td class="font-medium text-white">${p.name}</td>
-          <td class="text-right tabular-nums">${qtyText(p.quantity)} <span class="text-xs text-slate-500">${p.unit}</span></td>
+          <td class="font-medium text-fg">${p.name}</td>
+          <td class="text-right tabular-nums">${qtyText(p.quantity)} <span class="text-xs text-subtle">${p.unit}</span></td>
           <td class="text-right font-semibold tabular-nums">${formatVND(p.revenue)}</td>
-          <td class="text-right text-slate-400 tabular-nums">${String(total ? Math.round((p.revenue / total) * 1000) / 10 : 0).replace('.', ',')}%</td>
+          <td class="text-right text-muted tabular-nums">${String(total ? Math.round((p.revenue / total) * 1000) / 10 : 0).replace('.', ',')}%</td>
         </tr>`)}</tbody>
       </table></div>
     </div>`);

@@ -8,8 +8,8 @@ import { openCreateCustomer } from './forms.js';
 import { matchCustomer } from './logic.js';
 
 function debtTag(b) {
-  if (b > 0) return html`<span class="text-right text-xs"><span class="block text-slate-500">Còn nợ</span><span class="font-semibold text-amber-300 tabular-nums">${formatVND(b)}</span></span>`;
-  if (b < 0) return html`<span class="text-right text-xs"><span class="block text-slate-500">Trả dư</span><span class="font-semibold text-emerald-300 tabular-nums">${formatVND(-b)}</span></span>`;
+  if (b > 0) return html`<span class="text-right text-xs"><span class="block text-subtle">Còn nợ</span><span class="font-semibold text-warn tabular-nums">${formatVND(b)}</span></span>`;
+  if (b < 0) return html`<span class="text-right text-xs"><span class="block text-subtle">Trả dư</span><span class="font-semibold text-good tabular-nums">${formatVND(-b)}</span></span>`;
   return '';
 }
 
@@ -20,7 +20,7 @@ export function renderCustomers(root) {
     html`<section class="space-y-4">
       <div class="flex flex-wrap items-center gap-3">
         <div class="relative min-w-0 flex-1 basis-56">
-          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-500">${icon('search', 'size-4')}</span>
+          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-subtle">${icon('search', 'size-4')}</span>
           <input class="input pl-9" type="search" placeholder="Tìm tên, SĐT, địa chỉ…" data-search aria-label="Tìm khách" />
         </div>
         <select class="input w-auto" data-status aria-label="Lọc trạng thái">
@@ -56,21 +56,21 @@ export function renderCustomers(root) {
     if (!rows.length) return setHtml(listEl, emptyState('Không có khách phù hợp bộ lọc'));
     setHtml(
       listEl,
-      html`<p class="mb-2 text-xs text-slate-500">${rows.length} khách</p>
+      html`<p class="mb-2 text-xs text-subtle">${rows.length} khách</p>
       <ul class="grid gap-3 md:grid-cols-2">
         ${rows.map(
           (c) => html`<li>
             <a href="#/khach-hang/${c.id}" class="card card-hover flex items-center gap-3">
-              <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky-500/25 to-violet-500/25 font-semibold text-white">
+              <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-accent/15 to-accent/5 font-semibold text-fg">
                 ${c.name.trim().charAt(0).toUpperCase()}
               </span>
               <span class="min-w-0 flex-1">
-                <span class="block truncate font-semibold text-white">${c.name}</span>
-                <span class="block truncate text-xs text-slate-500">${[c.phone, c.address].filter(Boolean).join(' · ') || 'Chưa có SĐT, địa chỉ'}</span>
+                <span class="block truncate font-semibold text-fg">${c.name}</span>
+                <span class="block truncate text-xs text-subtle">${[c.phone, c.address].filter(Boolean).join(' · ') || 'Chưa có SĐT, địa chỉ'}</span>
               </span>
               ${debtTag(state.balances.get(c.id) ?? 0)}
               ${c.is_active ? '' : html`<span class="badge-gray">Ngừng</span>`}
-              <span class="text-slate-600" aria-hidden="true">›</span>
+              <span class="text-faint" aria-hidden="true">›</span>
             </a>
           </li>`,
         )}

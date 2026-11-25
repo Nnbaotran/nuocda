@@ -3,19 +3,83 @@
 @source "../index.html";
 @source "./";
 
-/* Bảng màu thương hiệu: navy đậm + gradient xanh dương – cyan – tím */
+/* Lớp dark:… áp dụng khi <html data-theme="dark"> (do người dùng chọn, không theo hệ điều hành) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Bảng màu kế thừa AutoTax: đỏ chủ đạo, mặc định nền SÁNG, có chế độ TỐI.
+   Mọi màu dùng qua token (text-fg, bg-surface, text-accent-ink…); giá trị đổi theo
+   <html data-theme="light|dark"> ở khối bên dưới — chỉ sửa màu ở MỘT chỗ. */
 @theme {
-  --color-ink-950: #050816;
-  --color-ink-900: #0a1024;
-  --color-ink-850: #0e1630;
-  --color-ink-800: #131d3b;
-  --color-ink-700: #1c2950;
-  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --color-page: var(--c-page);
+  --color-surface: var(--c-surface);
+  --color-field: var(--c-field);
+  --color-fg: var(--c-fg);
+  --color-fg-2: var(--c-fg-2);
+  --color-muted: var(--c-muted);
+  --color-subtle: var(--c-subtle);
+  --color-faint: var(--c-faint);
+  --color-accent: var(--c-accent);
+  --color-accent-2: var(--c-accent-2);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-good: var(--c-good);
+  --color-warn: var(--c-warn);
+  --color-bad: var(--c-bad);
+  --color-info: var(--c-info);
+  --color-cool: var(--c-cool);
+  --font-sans: "Inter", Arial, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Chế độ SÁNG (mặc định) */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --c-page: #f3f5f7;
+  --c-surface: #ffffff;
+  --c-field: #ffffff;
+  --c-fg: #111827;
+  --c-fg-2: #1f2937;
+  --c-muted: #4b5565;
+  --c-subtle: #647084;
+  --c-faint: #94a3b8;
+  --c-accent: #ef3c4d;
+  --c-accent-2: #c81e32;
+  --c-accent-ink: #c81e32; /* chữ đỏ đủ tương phản trên nền trắng */
+  --c-good: #047857;
+  --c-warn: #b45309;
+  --c-bad: #be123c;
+  --c-info: #6d28d9;
+  --c-cool: #0369a1;
+  --c-glow-1: rgba(203, 24, 48, 0.1);
+  --c-glow-2: rgba(95, 112, 139, 0.12);
+  --c-shadow: rgba(15, 23, 42, 0.08);
+}
+
+/* Chế độ TỐI */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-page: #09090b;
+  --c-surface: #111114;
+  --c-field: #19191e;
+  --c-fg: #f8fafc;
+  --c-fg-2: #e2e8f0;
+  --c-muted: #a5a5b1;
+  --c-subtle: #8a8a96;
+  --c-faint: #5c5c66;
+  --c-accent: #ef3c4d;
+  --c-accent-2: #b8162a;
+  --c-accent-ink: #f8717e;
+  --c-good: #6ee7b7;
+  --c-warn: #fcd34d;
+  --c-bad: #fda4af;
+  --c-info: #c4b5fd;
+  --c-cool: #7dd3fc;
+  --c-glow-1: rgba(199, 20, 45, 0.16);
+  --c-glow-2: rgba(118, 132, 155, 0.1);
+  --c-shadow: rgba(0, 0, 0, 0.35);
 }
 
 @layer base {
   html {
-    color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
     /* Không cho trình duyệt tự phóng chữ; chạm đúp không phóng to */
     -webkit-text-size-adjust: 100%;
@@ -35,14 +99,15 @@
     overscroll-behavior: none;
   }
   body {
-    @apply min-h-dvh bg-ink-950 font-sans text-slate-200 antialiased;
+    @apply min-h-dvh bg-page font-sans text-fg-2 antialiased;
+    /* Ánh sáng nền kiểu AutoTax: đỏ + xám rất nhẹ, tĩnh (không chạy hiệu ứng để không nặng máy) */
     background-image:
-      radial-gradient(60rem 40rem at 110% -10%, rgb(124 58 237 / 0.14), transparent 60%),
-      radial-gradient(50rem 35rem at -10% 0%, rgb(14 165 233 / 0.12), transparent 60%);
+      radial-gradient(50rem 36rem at 105% -10%, var(--c-glow-1), transparent 62%),
+      radial-gradient(46rem 34rem at -10% 105%, var(--c-glow-2), transparent 62%);
     background-attachment: fixed;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-cyan-400;
+    @apply outline-2 outline-offset-2 outline-accent;
   }
   input, select, textarea, button {
     font: inherit;
@@ -51,13 +116,13 @@
 
 @layer components {
   .gradient-text {
-    @apply bg-gradient-to-r from-sky-400 via-cyan-300 to-violet-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-accent to-accent-2 bg-clip-text text-transparent;
   }
   .card {
-    @apply rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-lg shadow-black/20 backdrop-blur-sm;
+    @apply rounded-2xl border border-fg/10 bg-surface/85 p-4 shadow-lg shadow-(color:--c-shadow) backdrop-blur-sm;
   }
   .card-hover {
-    @apply transition duration-200 hover:border-cyan-400/30 hover:shadow-cyan-500/10;
+    @apply transition duration-200 hover:-translate-y-px hover:border-accent/35;
   }
 
   /* Nút: cao tối thiểu 44px để dễ chạm trên điện thoại */
@@ -65,89 +130,89 @@
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition duration-150 select-none disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-gradient-to-r from-sky-500 via-cyan-500 to-violet-500 text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-[0.98];
+    @apply bg-gradient-to-r from-accent to-accent-2 text-white shadow-lg shadow-accent/25 hover:-translate-y-px hover:brightness-105 active:translate-y-0 active:scale-[0.98];
   }
   .btn-secondary {
-    @apply border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 active:scale-[0.98];
+    @apply border border-fg/12 bg-surface text-fg-2 hover:-translate-y-px hover:bg-fg/5 active:translate-y-0 active:scale-[0.98];
   }
   .btn-danger {
-    @apply bg-rose-600 text-white hover:bg-rose-500 active:scale-[0.98];
+    @apply bg-rose-600 text-white hover:-translate-y-px hover:bg-rose-500 active:translate-y-0 active:scale-[0.98];
   }
   .btn-icon {
-    @apply inline-grid size-11 place-items-center rounded-xl text-slate-400 transition hover:bg-white/10 hover:text-white;
+    @apply inline-grid size-11 place-items-center rounded-xl text-muted transition hover:bg-fg/8 hover:text-fg;
   }
 
   .field-label {
-    @apply mb-1.5 block text-sm font-medium text-slate-300;
+    @apply mb-1.5 block text-sm font-medium text-fg-2;
   }
   .input {
-    @apply block min-h-11 w-full rounded-xl border border-white/10 bg-ink-850 px-3.5 text-base text-white placeholder:text-slate-500 transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none aria-[invalid=true]:border-rose-500/70;
+    @apply block min-h-11 w-full rounded-xl border border-fg/15 bg-field px-3.5 text-base text-fg placeholder:text-subtle transition focus:border-accent/70 focus:ring-2 focus:ring-accent/20 focus:outline-none aria-[invalid=true]:border-rose-500/70;
   }
   textarea.input {
     @apply py-2.5;
   }
   .field-error {
-    @apply mt-1 text-sm text-rose-400;
+    @apply mt-1 text-sm text-bad;
   }
   .form-error {
-    @apply rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200;
+    @apply rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-bad;
   }
 
   .badge, .badge-green, .badge-gray, .badge-violet, .badge-cyan {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
   .badge-green {
-    @apply bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30;
+    @apply bg-emerald-500/15 text-good ring-1 ring-emerald-500/30;
   }
   .badge-gray {
-    @apply bg-slate-500/15 text-slate-400 ring-1 ring-slate-500/30;
+    @apply bg-slate-500/15 text-muted ring-1 ring-slate-500/30;
   }
   .badge-violet {
-    @apply bg-violet-500/15 text-violet-300 ring-1 ring-violet-500/30;
+    @apply bg-violet-500/15 text-info ring-1 ring-violet-500/30;
   }
   .badge-cyan {
-    @apply bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/30;
+    @apply bg-accent/12 text-accent-ink ring-1 ring-accent/30;
   }
 
   .table-wrap {
-    @apply overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70;
+    @apply overflow-hidden rounded-2xl border border-fg/10 bg-surface/85;
   }
   .table {
     @apply w-full text-left text-sm;
   }
   .table th {
-    @apply bg-white/[0.03] px-4 py-3 text-xs font-semibold tracking-wide text-slate-400 uppercase;
+    @apply bg-fg/[0.04] px-4 py-3 text-xs font-semibold tracking-wide text-muted uppercase;
   }
   .table td {
-    @apply border-t border-white/5 px-4 py-3 align-middle;
+    @apply border-t border-fg/8 px-4 py-3 align-middle;
   }
   .table tbody tr {
-    @apply transition hover:bg-white/[0.03];
+    @apply transition hover:bg-fg/[0.03];
   }
 
   .skeleton {
-    @apply animate-pulse rounded-2xl bg-white/5;
+    @apply animate-pulse rounded-2xl bg-fg/6;
   }
 
   /* Điều hướng */
   .nav-link {
-    @apply flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white;
+    @apply flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted transition hover:-translate-y-px hover:bg-fg/5 hover:text-fg;
   }
   .nav-link[aria-current="page"] {
-    @apply bg-gradient-to-r from-sky-500/20 to-violet-500/10 text-white ring-1 ring-cyan-400/30;
+    @apply bg-accent/10 text-accent-ink ring-1 ring-accent/30;
   }
   .bottom-link {
-    @apply flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-slate-500 transition;
+    @apply flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-subtle transition;
   }
   .bottom-link[aria-current="page"] {
-    @apply text-cyan-300;
+    @apply text-accent-ink;
   }
 
   .modal-backdrop {
     @apply fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-150 md:items-center md:p-4;
   }
   .modal-panel {
-    @apply w-full rounded-t-3xl border border-white/10 bg-ink-900 shadow-2xl shadow-black/50 md:max-w-lg md:rounded-3xl;
+    @apply w-full rounded-t-3xl border border-fg/10 bg-surface shadow-2xl shadow-black/30 md:max-w-lg md:rounded-3xl;
     animation: rise 0.2s ease-out;
   }
 
@@ -159,10 +224,10 @@
     animation: rise 0.2s ease-out;
   }
   .toast-success {
-    @apply border-emerald-500/30 bg-ink-850/95 text-emerald-200;
+    @apply border-emerald-500/40 bg-field/95 text-good;
   }
   .toast-error {
-    @apply border-rose-500/40 bg-ink-850/95 text-rose-200;
+    @apply border-rose-500/40 bg-field/95 text-bad;
   }
 
   .fade-in {

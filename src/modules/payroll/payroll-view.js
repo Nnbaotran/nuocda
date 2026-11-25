@@ -43,10 +43,10 @@ export function renderPayroll(root) {
       html`<div class="space-y-5">
         <div class="card flex flex-wrap items-center gap-3 ${state.closed ? 'border-emerald-400/30' : ''}">
           <div class="min-w-0 flex-1">
-            <p class="text-sm ${state.closed ? 'text-emerald-300' : 'text-amber-300'}">
+            <p class="text-sm ${state.closed ? 'text-good' : 'text-warn'}">
               ${state.closed ? `Đã chốt lúc ${formatDateTime(closedAt)}` : 'Chưa chốt – số liệu tạm tính, còn thay đổi theo chấm công'}</p>
-            <p class="text-sm text-slate-400">Tổng thực lĩnh</p>
-            <p class="gradient-text text-2xl font-bold tabular-nums">${formatVND(total)}</p>
+            <p class="text-sm text-muted">Tổng thực lĩnh</p>
+            <p class="text-2xl font-bold text-fg tabular-nums">${formatVND(total)}</p>
           </div>
           <div class="flex flex-wrap gap-2">
             ${rows.length ? html`<button class="btn-secondary" data-export>Xuất CSV</button>` : ''}
@@ -61,14 +61,14 @@ export function renderPayroll(root) {
           : html`<ul class="space-y-2 md:hidden">
               ${rows.map((r) => html`<li class="card p-3">
                 <div class="flex items-baseline justify-between gap-2">
-                  <p class="truncate font-semibold text-white">${r.employee_name}</p>
-                  <p class="font-bold text-cyan-300 tabular-nums">${formatVND(r.net_pay)}</p>
+                  <p class="truncate font-semibold text-fg">${r.employee_name}</p>
+                  <p class="font-bold text-accent-ink tabular-nums">${formatVND(r.net_pay)}</p>
                 </div>
-                <p class="mt-1 text-xs text-slate-500">${SALARY_TYPES[r.salary_type].label} ${formatVND(r.salary_amount)} · ${unitsText(r.work_units)} công${r.salary_type === 'monthly' ? ` / ${r.days_in_month} ngày` : ''}</p>
+                <p class="mt-1 text-xs text-subtle">${SALARY_TYPES[r.salary_type].label} ${formatVND(r.salary_amount)} · ${unitsText(r.work_units)} công${r.salary_type === 'monthly' ? ` / ${r.days_in_month} ngày` : ''}</p>
                 <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
-                  <div><p class="text-slate-500">Theo công</p><p class="tabular-nums">${formatVND(r.base_pay)}</p></div>
-                  <div><p class="text-slate-500">Thưởng</p><p class="text-emerald-300 tabular-nums">+${formatVND(r.bonus)}</p></div>
-                  <div><p class="text-slate-500">Phạt</p><p class="text-rose-300 tabular-nums">−${formatVND(r.penalty)}</p></div>
+                  <div><p class="text-subtle">Theo công</p><p class="tabular-nums">${formatVND(r.base_pay)}</p></div>
+                  <div><p class="text-subtle">Thưởng</p><p class="text-good tabular-nums">+${formatVND(r.bonus)}</p></div>
+                  <div><p class="text-subtle">Phạt</p><p class="text-bad tabular-nums">−${formatVND(r.penalty)}</p></div>
                 </div>
               </li>`)}
             </ul>
@@ -77,13 +77,13 @@ export function renderPayroll(root) {
                 <thead><tr><th>Nhân viên</th><th>Mức lương</th><th class="text-right">Công</th><th class="text-right">Lương theo công</th><th class="text-right">Thưởng</th><th class="text-right">Phạt</th><th class="text-right">Thực lĩnh</th></tr></thead>
                 <tbody>
                   ${rows.map((r) => html`<tr>
-                    <td class="font-medium text-white">${r.employee_name}<span class="block text-xs text-slate-500">${r.position}</span></td>
-                    <td class="text-slate-400">${formatVND(r.salary_amount)} ${SALARY_TYPES[r.salary_type].unit}</td>
-                    <td class="text-right tabular-nums">${unitsText(r.work_units)}${r.salary_type === 'monthly' ? html`<span class="text-slate-500">/${r.days_in_month}</span>` : ''}</td>
+                    <td class="font-medium text-fg">${r.employee_name}<span class="block text-xs text-subtle">${r.position}</span></td>
+                    <td class="text-muted">${formatVND(r.salary_amount)} ${SALARY_TYPES[r.salary_type].unit}</td>
+                    <td class="text-right tabular-nums">${unitsText(r.work_units)}${r.salary_type === 'monthly' ? html`<span class="text-subtle">/${r.days_in_month}</span>` : ''}</td>
                     <td class="text-right tabular-nums">${formatVND(r.base_pay)}</td>
-                    <td class="text-right text-emerald-300 tabular-nums">${formatVND(r.bonus)}</td>
-                    <td class="text-right text-rose-300 tabular-nums">${formatVND(r.penalty)}</td>
-                    <td class="text-right font-bold text-cyan-300 tabular-nums">${formatVND(r.net_pay)}</td>
+                    <td class="text-right text-good tabular-nums">${formatVND(r.bonus)}</td>
+                    <td class="text-right text-bad tabular-nums">${formatVND(r.penalty)}</td>
+                    <td class="text-right font-bold text-accent-ink tabular-nums">${formatVND(r.net_pay)}</td>
                   </tr>`)}
                 </tbody>
               </table>
@@ -91,19 +91,19 @@ export function renderPayroll(root) {
 
         <div class="space-y-3">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="font-semibold text-white">Thưởng / phạt trong tháng</h3>
+            <h3 class="font-semibold text-fg">Thưởng / phạt trong tháng</h3>
             ${state.closed ? '' : html`<button class="btn-secondary" data-add-adj>${icon('plus', 'size-4')} Thêm</button>`}
           </div>
           ${!state.adjustments.length
-            ? html`<p class="text-sm text-slate-500">Chưa có khoản thưởng/phạt nào.</p>`
-            : html`<ul class="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+            ? html`<p class="text-sm text-subtle">Chưa có khoản thưởng/phạt nào.</p>`
+            : html`<ul class="divide-y divide-fg/5 overflow-hidden rounded-2xl border border-fg/10 bg-surface/70">
                 ${state.adjustments.map((a) => html`<li class="flex items-center gap-3 px-4 py-3">
                   <div class="min-w-0 flex-1">
-                    <p class="font-medium text-white">${a.employees?.name ?? ''}</p>
-                    <p class="text-xs text-slate-500">${formatDateStr(a.adj_date)} · ${a.reason}</p>
+                    <p class="font-medium text-fg">${a.employees?.name ?? ''}</p>
+                    <p class="text-xs text-subtle">${formatDateStr(a.adj_date)} · ${a.reason}</p>
                   </div>
-                  <p class="font-semibold tabular-nums ${a.kind === 'bonus' ? 'text-emerald-300' : 'text-rose-300'}">${a.kind === 'bonus' ? '+' : '−'}${formatVND(a.amount)}</p>
-                  ${state.closed ? '' : html`<button class="btn-icon hover:text-rose-400" data-del-adj="${a.id}" aria-label="Xoá khoản này">${icon('trash', 'size-4')}</button>`}
+                  <p class="font-semibold tabular-nums ${a.kind === 'bonus' ? 'text-good' : 'text-bad'}">${a.kind === 'bonus' ? '+' : '−'}${formatVND(a.amount)}</p>
+                  ${state.closed ? '' : html`<button class="btn-icon hover:text-bad" data-del-adj="${a.id}" aria-label="Xoá khoản này">${icon('trash', 'size-4')}</button>`}
                 </li>`)}
               </ul>`}
         </div>
@@ -132,9 +132,9 @@ export function renderPayroll(root) {
           <select class="input" id="adj-emp" name="employee_id">${active.map((e) => html`<option value="${e.id}">${e.name}</option>`)}</select>
         </div>
         <div class="grid grid-cols-2 gap-2">
-          <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 has-[:checked]:border-emerald-400/50 has-[:checked]:bg-emerald-500/10">
+          <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fg/10 bg-fg/[0.03] px-3 has-[:checked]:border-emerald-400/50 has-[:checked]:bg-emerald-500/10">
             <input type="radio" name="kind" value="bonus" class="accent-emerald-400" checked /> Thưởng</label>
-          <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 has-[:checked]:border-rose-400/50 has-[:checked]:bg-rose-500/10">
+          <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-fg/10 bg-fg/[0.03] px-3 has-[:checked]:border-rose-400/50 has-[:checked]:bg-rose-500/10">
             <input type="radio" name="kind" value="penalty" class="accent-rose-400" /> Phạt</label>
         </div>
         <div>

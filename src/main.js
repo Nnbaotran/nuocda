@@ -1,5 +1,6 @@
 // Điểm khởi động app: khôi phục đăng nhập -> vẽ khung -> điều hướng theo địa chỉ (#/...).
 import { setupDevice } from './lib/device.js';
+import { refreshThemeButtons, setupTheme } from './lib/theme.js';
 import { renderLogin } from './modules/auth/login-view.js';
 import { currentProfile, initSession, onSessionChange } from './modules/auth/session.js';
 import { renderShell } from './modules/layout/shell.js';
@@ -17,7 +18,8 @@ function navigate() {
   const profile = currentProfile();
   if (!profile) {
     shell = null;
-    return renderLogin(app);
+    renderLogin(app);
+    return refreshThemeButtons();
   }
   const routes = routesFor(profile.role);
   if (!shell) shell = renderShell(app, routes);
@@ -31,10 +33,12 @@ function navigate() {
   void shell.page.offsetWidth; // khởi động lại hiệu ứng xuất hiện
   shell.page.classList.add('fade-in');
   route.render(shell.page, { routes, params: route.params });
+  refreshThemeButtons();
   window.scrollTo({ top: 0 });
 }
 
 async function start() {
+  setupTheme();
   setupDevice();
   const { error } = await initSession();
   window.addEventListener('hashchange', navigate);
@@ -42,7 +46,10 @@ async function start() {
     shell = null;
     navigate();
   });
-  if (error) renderLogin(app, { notice: error });
+  if (error) {
+    renderLogin(app, { notice: error });
+    refreshThemeButtons();
+  }
   else navigate();
 }
 
