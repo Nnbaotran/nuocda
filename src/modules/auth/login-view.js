@@ -27,7 +27,7 @@ export function renderLogin(root, { notice } = {}) {
             </div>
           </div>
           <button type="submit" class="btn-primary w-full">Đăng nhập</button>
-          <p class="text-center text-xs text-slate-500">Quên mật khẩu? Hãy nhờ Chủ đặt lại giúp.</p>
+          <p class="text-center text-xs text-slate-500">Quên mật khẩu? Đặt lại trong Supabase › Authentication › Users.</p>
         </form>
       </div>
     </main>`,

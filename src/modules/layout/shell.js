@@ -2,7 +2,7 @@
 import { APP_NAME } from '../../config.js';
 import { $, $$, html, setHtml } from '../../lib/dom.js';
 import { confirmDialog, icon } from '../../lib/ui.js';
-import { currentProfile, ROLE_LABELS, signOut } from '../auth/session.js';
+import { currentProfile, displayName, ROLE_LABELS, signOut } from '../auth/session.js';
 
 function navLinks(routes) {
   return routes.map(
@@ -27,7 +27,7 @@ export function renderShell(root, routes) {
         <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-2" aria-label="Menu chính">${navLinks(routes)}</nav>
         <div class="border-t border-white/10 p-3">
           <div class="mb-2 px-2 text-sm">
-            <p class="truncate font-medium text-white">${p.full_name || 'Chưa đặt tên'}</p>
+            <p class="truncate font-medium text-white">${displayName()}</p>
             <p class="text-xs text-slate-500">${ROLE_LABELS[p.role]}</p>
           </div>
           <button class="nav-link w-full" data-logout>${icon('logout')} Đăng xuất</button>
@@ -59,7 +59,7 @@ export function renderShell(root, routes) {
           </div>
           <nav class="flex-1 space-y-1 overflow-y-auto px-3" aria-label="Menu đầy đủ">${navLinks(routes)}</nav>
           <div class="border-t border-white/10 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <p class="truncate px-2 text-sm font-medium text-white">${p.full_name || 'Chưa đặt tên'}</p>
+            <p class="truncate px-2 text-sm font-medium text-white">${displayName()}</p>
             <p class="mb-2 px-2 text-xs text-slate-500">${ROLE_LABELS[p.role]}</p>
             <button class="nav-link w-full" data-logout>${icon('logout')} Đăng xuất</button>
           </div>
