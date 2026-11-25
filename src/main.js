@@ -1,4 +1,5 @@
 // Điểm khởi động app: khôi phục đăng nhập -> vẽ khung -> điều hướng theo địa chỉ (#/...).
+import { setupDevice } from './lib/device.js';
 import { renderLogin } from './modules/auth/login-view.js';
 import { currentProfile, initSession, onSessionChange } from './modules/auth/session.js';
 import { renderShell } from './modules/layout/shell.js';
@@ -34,6 +35,7 @@ function navigate() {
 }
 
 async function start() {
+  setupDevice();
   const { error } = await initSession();
   window.addEventListener('hashchange', navigate);
   onSessionChange(() => {

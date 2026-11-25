@@ -37,6 +37,9 @@ function copyStatic() {
   const html = readFileSync(resolve(root, 'index.html'), 'utf8').replaceAll('__BUILD_VERSION__', version);
   writeFileSync(resolve(dist, 'index.html'), html);
   if (existsSync(resolve(root, 'public'))) cpSync(resolve(root, 'public'), dist, { recursive: true });
+  // Mỗi bản build có mã riêng để service worker bỏ bộ nhớ đệm cũ
+  const sw = resolve(dist, 'sw.js');
+  if (existsSync(sw)) writeFileSync(sw, readFileSync(sw, 'utf8').replaceAll('__BUILD_VERSION__', version));
 }
 
 const options = {

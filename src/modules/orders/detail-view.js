@@ -1,11 +1,11 @@
 // Chi tiết đơn: các dòng hàng, tổng/đã trả/còn nợ, Sửa đơn, Huỷ đơn, lịch sử sửa/huỷ.
 import { $, html, setHtml } from '../../lib/dom.js';
 import { formatDateTime, formatVND } from '../../lib/format.js';
-import { errorState, icon, loadingState, openModal, promptReason, toast } from '../../lib/ui.js';
+import { confirmDialog, errorState, icon, loadingState, openModal, promptReason, toast } from '../../lib/ui.js';
 import { getCustomerPrices } from '../customers/api.js';
 import { buildPriceRows } from '../customers/logic.js';
 import { listProducts } from '../products/api.js';
-import { cancelOrder, getOrder, updateOrder } from './api.js';
+import { cancelOrder, deleteCancelledOrder, getOrder, updateOrder } from './api.js';
 import { mountOrderEditor } from './editor.js';
 import { ORDER_STATUS, payModeOf } from './logic.js';
 
@@ -71,7 +71,9 @@ export function renderOrderDetail(root, { params }) {
                 <button class="btn-secondary flex-1" data-edit>${icon('edit', 'size-4')} Sửa đơn</button>
                 <button class="btn-secondary flex-1 hover:text-rose-300" data-cancel>${icon('x', 'size-4')} Huỷ đơn</button>
               </div>`
-            : ''}
+            : html`<div class="mt-4">
+                <button class="btn-danger w-full" data-delete>${icon('trash', 'size-4')} Xoá khỏi lịch sử đơn hàng</button>
+              </div>`}
         </div>
 
         <div class="table-wrap">
@@ -159,8 +161,25 @@ export function renderOrderDetail(root, { params }) {
     }
   }
 
+  async function onDelete() {
+    const ok = await confirmDialog({
+      title: `Xoá đơn ${order.code}`,
+      message: 'Đơn đã huỷ sẽ bị xoá hẳn khỏi lịch sử đơn hàng, không khôi phục được. Doanh thu và công nợ không thay đổi (đơn huỷ vốn không được tính).',
+      confirmLabel: 'Xoá hẳn',
+    });
+    if (!ok) return;
+    try {
+      await deleteCancelledOrder(order.id);
+      toast(`Đã xoá đơn ${order.code}`);
+      location.hash = '#/don-hang';
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  }
+
   section.addEventListener('click', (e) => {
     if (!order) return;
+    if (e.target.closest('[data-delete]')) onDelete();
     if (e.target.closest('[data-edit]')) openEdit();
     if (e.target.closest('[data-cancel]')) onCancel();
   });
