@@ -17,6 +17,22 @@
   html {
     color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
+    /* Không cho trình duyệt tự phóng chữ; chạm đúp không phóng to */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  /* Tỉ lệ theo thiết bị: điện thoại nhỏ (360px) chữ ~14,8px, điện thoại thường (≥390px) 16px;
+     cả giao diện co giãn theo vì kích thước dùng đơn vị rem. Máy tính bảng/máy tính giữ 16px. */
+  @media (max-width: 639px) {
+    html {
+      font-size: clamp(14px, 4.1vw, 16px);
+    }
+  }
+  /* App đã cài (PWA): không kéo giãn/nảy cả trang khi vuốt quá đầu/cuối */
+  html.is-standalone,
+  html.is-standalone body {
+    overscroll-behavior: none;
   }
   body {
     @apply min-h-dvh bg-ink-950 font-sans text-slate-200 antialiased;
