@@ -1,0 +1,23 @@
+{
+  "name": "hang-da-le-xuan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mini app gia đình – Hãng đá Lệ Xuân: bán hàng, công nợ, nhân viên, lương, chi phí, báo cáo",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && tailwindcss -i src/styles.css -o dist/assets/app.css --minify",
+    "dev": "node scripts/build.mjs --serve",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
