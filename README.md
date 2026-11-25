@@ -10,7 +10,7 @@
 |---|---|---|
 | 1 | Đăng nhập (1 tài khoản Chủ), sản phẩm | ✅ `v0.1.0` |
 | 2 | Khách hàng + giá riêng | ✅ `v0.2.0` |
-| 3 | Đơn hàng + công nợ | ⏳ |
+| 3 | Đơn hàng + công nợ | ✅ `v0.3.0` |
 | 4 | Nhân viên + chấm công + lương | ⏳ |
 | 5 | Chi phí + báo cáo | ⏳ |
 | 6 | Hoàn thiện deploy | ⏳ |
@@ -68,7 +68,8 @@ src/
     auth/                  Đăng nhập, phiên, vai trò
     layout/                Header, sidebar, thanh điều hướng điện thoại
     products/              Sản phẩm (api, kiểm tra dữ liệu, màn hình)
-    customers/             Hồ sơ khách, popup giá lần đầu, hồ sơ 3 thẻ, bảng giá riêng
+    customers/             Hồ sơ khách, popup giá lần đầu, hồ sơ 3 thẻ (giá bán, bán hàng, công nợ)
+    orders/                Khung lên/sửa đơn, danh sách đơn, chi tiết đơn, logic tiền (có test)
     home/, placeholder/    Trang tổng quan, trang "Sắp có"
 supabase/
   migrations/              Thay đổi database theo thứ tự thời gian (đã áp lên Supabase)
@@ -83,12 +84,29 @@ tests/                     Kiểm thử (node:test)
 | Bảng | Chủ (OWNER) | Tài khoản khác / chưa đăng nhập |
 |---|---|---|
 | `products`, `customers`, `customer_prices` | xem, thêm, sửa, xoá | không thấy gì |
+| `orders`, `order_items`, `payments`, `audit_logs` | chỉ xem trực tiếp; ghi qua hàm bên dưới | không thấy gì |
 | `profiles` | xem, sửa | chỉ thấy hồ sơ của chính mình |
 
 Hàm database (RPC):
 - `create_customer(...)`: tạo hồ sơ khách + giá lần đầu trong **một giao dịch** (lỗi giữa chừng thì không tạo gì).
 - `set_customer_prices(customer_id, prices)`: lưu các giá đã đổi của một khách.
 - Trigger: thêm sản phẩm mới → tự có giá (= giá chung) cho mọi khách. Giá riêng là bản sao độc lập, đổi giá chung sau này không ảnh hưởng.
+
+### Đơn hàng & công nợ (giai đoạn 3)
+Bảng đơn/chi tiết/phiếu thu/nhật ký **không ghi trực tiếp được**; mọi thao tác đi qua hàm, mỗi hàm là một giao dịch:
+
+| Hàm | Việc |
+|---|---|
+| `create_order(customer, items, paid, note, date)` | Lên đơn. Database tự tính thành tiền, tổng; chụp giá vào chi tiết; mã đơn `DHyymmdd-001` |
+| `update_order(order, items, paid, note, date)` | Sửa đơn (giữ mã), ghi nhật ký trước/sau |
+| `cancel_order(order, reason)` | Huỷ đơn: không xoá, tự loại khỏi doanh thu + công nợ, ghi nhật ký |
+| `record_payment(customer, amount, date, note)` | Khách trả nợ (ghi chung theo khách); chặn trả quá số nợ |
+| `cancel_payment(payment, reason)` | Huỷ phiếu thu nhập nhầm, ghi nhật ký |
+| `customer_ledger(customer, from, to)` | Sổ nợ: nợ đầu kỳ + các dòng phát sinh |
+| view `customer_balances` | Công nợ hiện tại từng khách |
+
+Công thức: **Công nợ = Σ(tổng đơn − đã trả lúc mua) của đơn còn hiệu lực − Σ phiếu thu còn hiệu lực.**
+Nợ cuối kỳ = nợ đầu kỳ + phát sinh tăng − phát sinh giảm. Số âm = khách trả dư (ví dụ huỷ đơn đã trả nợ).
 
 - Tài khoản không phải Chủ: không xem được gì, app từ chối đăng nhập.
 - Database chặn việc khoá/hạ quyền **Chủ cuối cùng**.
