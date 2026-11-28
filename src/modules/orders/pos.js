@@ -2,6 +2,7 @@
 // Thiết kế cho người lớn tuổi / ít dùng công nghệ:
 //   - 4 bước, mỗi màn hình chỉ làm 1 việc: ① Chọn hàng → ② Cách trả tiền → ③ Xác nhận → ④ Xong
 //   - Nút cao ≥ 56px, chữ to, tiền hiện rất to; bấm ô sản phẩm = thêm 1 (rung nhẹ trên Android)
+//   - Mọi thao tác chọn hàng nằm trên chính ô hàng: số tròn đỏ = nhập số lượng, cây bút = sửa giá
 //   - Không phải gõ bàn phím: có bàn phím số to ngay trên màn hình
 //   - Màu theo việc: xanh lá = đồng ý/trả tiền, vàng = ghi nợ, xanh lam = trả một phần, đỏ = xoá
 // Chỉ vẽ lại phần thay đổi (ô được bấm, giỏ hàng, thanh tổng tiền), không vẽ lại cả trang.
@@ -12,7 +13,7 @@ import { confirmDialog, icon, openModal } from '../../lib/ui.js';
 import { balanceLabel, lineTotal } from './logic.js';
 import {
   addOne, cartCount, cartItems, cartLines, cartTotal, createCart,
-  keypadPress, keypadValue, quickAmounts, removeOne, setPrice, setQty,
+  keypadPress, keypadValue, quickAmounts, setPrice, setQty,
 } from './pos-logic.js';
 
 const buzz = () => navigator.vibrate?.(12);
@@ -24,6 +25,7 @@ export function openKeypad({ title, sub = '', mode = 'money', value = '' }) {
   return new Promise((resolve) => {
     let v = mode === 'qty' ? formatQty(value || '') : value ? String(value) : '';
     if (v === '0') v = '';
+    let fresh = true; // gõ số đầu tiên sẽ thay cả số đang hiện, không nối thêm
     let done = false;
     const show = () => (mode === 'money' ? (v ? formatVND(keypadValue(v)) : '0 ₫') : v || '0');
     const { el, close } = openModal({
@@ -46,6 +48,8 @@ export function openKeypad({ title, sub = '', mode = 'money', value = '' }) {
     el.addEventListener('click', (e) => {
       const k = e.target.closest('[data-key]')?.dataset.key;
       if (!k) return;
+      if (fresh && /^\d$/.test(k)) v = '';
+      fresh = false;
       v = keypadPress(v, k, mode);
       buzz();
       el.querySelector('[data-kp-display]').textContent = show();
@@ -121,6 +125,7 @@ export function mountPos(container, opts) {
   }
 
   // ---------- ① Chọn hàng ----------
+  // Tất cả thao tác nằm ngay trên ô hàng: bấm ô = thêm 1, bấm số tròn = nhập số lượng, bấm bút = sửa giá.
   function renderPick() {
     const active = rows.filter((r) => r.is_active || st.cart.has(r.product_id));
     setHtml(
@@ -129,21 +134,26 @@ export function mountPos(container, opts) {
         ${customerStrip()}
         <section class="space-y-3">
           ${head(1, 'Chọn hàng')}
-          <p class="text-base text-muted">Bấm vào ô hàng để thêm 1. Bấm nhiều lần để thêm nhiều.</p>
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-base text-muted">Bấm vào ô hàng để thêm 1. Bấm số tròn đỏ để nhập số lượng, bấm bút để sửa giá.</p>
+            <button type="button" class="hidden min-h-11 shrink-0 rounded-xl px-3 text-base font-semibold text-bad hover:bg-rose-500/10" data-act="clear" data-clear>${icon('trash', 'size-5 inline')} Xoá hết</button>
+          </div>
           ${active.length
             ? html`<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                ${active.map((r) => html`<button type="button" class="pos-tile" data-tile="${r.product_id}" aria-label="Thêm 1 ${r.unit} ${r.name}">
-                  <span class="pos-badge ${st.cart.has(r.product_id) ? '' : 'hidden'}" data-badge></span>
-                  <span class="text-xl leading-tight font-bold text-fg">${r.name}</span>
+                ${active.map((r) => html`<div class="pos-tile" data-tile="${r.product_id}" role="button" tabindex="0" aria-label="Thêm 1 ${r.unit} ${r.name}">
+                  <button type="button" class="pos-badge hidden" data-badge="${r.product_id}" aria-label="Nhập số lượng ${r.name}"></button>
+                  <span class="pr-10 text-xl leading-tight font-bold text-fg">${r.name}</span>
                   <span>
-                    <span class="block text-lg font-semibold text-accent-ink tabular-nums">${formatVND(r.price)}</span>
-                    <span class="block text-sm text-muted">mỗi ${r.unit}</span>
+                    <span class="flex w-full items-center justify-between gap-2">
+                      <span class="text-lg font-semibold text-accent-ink tabular-nums" data-price-text>${formatVND(r.price)}</span>
+                      <button type="button" class="pos-pen" data-price="${r.product_id}" aria-label="Sửa giá ${r.name}">${icon('edit', 'size-5')}</button>
+                    </span>
+                    <span class="block text-sm text-muted" data-unit-text>mỗi ${r.unit}</span>
                   </span>
-                </button>`)}
+                </div>`)}
               </div>`
             : html`<p class="card text-lg text-muted">Chưa có sản phẩm đang bán. Thêm ở mục Sản phẩm.</p>`}
         </section>
-        <section class="space-y-3" data-cart></section>
         <div class="${barCls()}" data-bar></div>
       </div>`,
     );
@@ -152,48 +162,31 @@ export function mountPos(container, opts) {
 
   function refreshPick() {
     for (const tile of $$('[data-tile]', container)) {
-      const item = st.cart.get(tile.dataset.tile);
+      const id = tile.dataset.tile;
+      const item = st.cart.get(id);
+      const row = rows.find((r) => r.product_id === id);
       tile.dataset.inCart = item ? 'true' : 'false';
       const b = $('[data-badge]', tile);
       b.classList.toggle('hidden', !item);
       b.textContent = item ? formatQty(item.qty) : '';
+      const custom = item && item.price !== row.price;
+      $('[data-price-text]', tile).textContent = formatVND(item?.price ?? row.price);
+      const unitEl = $('[data-unit-text]', tile);
+      unitEl.textContent = custom ? `mỗi ${row.unit} · giá sửa` : `mỗi ${row.unit}`;
+      unitEl.classList.toggle('text-warn', !!custom);
+      unitEl.classList.toggle('text-muted', !custom);
     }
-    const lines = cartLines(st.cart, rows);
-    setHtml(
-      $('[data-cart]', container),
-      lines.length
-        ? html`<div class="flex items-center justify-between gap-3">
-            <h3 class="text-xl font-bold text-fg">Hàng đã chọn (${lines.length})</h3>
-            <button type="button" class="min-h-12 rounded-xl px-3 text-base font-semibold text-bad hover:bg-rose-500/10" data-act="clear">${icon('trash', 'size-5 inline')} Xoá hết</button>
-          </div>
-          <ul class="space-y-3">
-            ${lines.map((l) => html`<li class="card p-3">
-              <div class="flex items-baseline justify-between gap-3">
-                <p class="min-w-0 text-xl font-bold text-fg">${l.name}</p>
-                <p class="shrink-0 text-xl font-bold text-fg tabular-nums">${formatVND(l.total)}</p>
-              </div>
-              <div class="mt-3 flex items-center gap-2">
-                <button type="button" class="pos-step" data-minus="${l.product_id}" aria-label="Bớt 1 ${l.name}">−</button>
-                <button type="button" class="pos-display min-w-24 flex-1 py-2 text-center text-3xl" data-qty="${l.product_id}" aria-label="Sửa số lượng ${l.name}">${formatQty(l.qty)}</button>
-                <button type="button" class="pos-step" data-plus="${l.product_id}" aria-label="Thêm 1 ${l.name}">+</button>
-              </div>
-              <div class="mt-2 flex items-center justify-between text-base text-muted">
-                <span>${formatQty(l.qty)} ${l.unit} × ${formatVND(l.price)}</span>
-                <button type="button" class="min-h-11 rounded-lg px-2 font-semibold text-accent-ink underline-offset-4 hover:underline" data-price="${l.product_id}">Sửa giá</button>
-              </div>
-            </li>`)}
-          </ul>`
-        : html`<div class="rounded-2xl border-2 border-dashed border-fg/15 p-6 text-center text-lg text-muted">${icon('cart', 'mx-auto mb-2 size-10 text-faint')}Chưa chọn hàng nào</div>`,
-    );
     const t = total();
+    const count = cartCount(st.cart);
+    $('[data-clear]', container)?.classList.toggle('hidden', !count);
     setHtml(
       $('[data-bar]', container),
       html`<div class="mx-auto flex max-w-5xl items-center gap-3">
         <div class="min-w-0 flex-1">
-          <p class="text-sm text-muted">Tổng tiền ${cartCount(st.cart) ? `(${cartCount(st.cart)} loại hàng)` : ''}</p>
+          <p class="text-sm text-muted">Tổng tiền ${count ? `(${count} loại hàng)` : ''}</p>
           <p class="truncate text-3xl font-black text-fg tabular-nums">${formatVND(t)}</p>
         </div>
-        <button type="button" class="btn-success w-auto min-w-40" data-act="to-pay" ${t <= 0 && !cartCount(st.cart) ? 'disabled' : ''}>Tiếp tục ${icon('back', 'size-6 rotate-180')}</button>
+        <button type="button" class="btn-success w-auto min-w-40" data-act="to-pay" ${!count ? 'disabled' : ''}>Tiếp tục ${icon('back', 'size-6 rotate-180')}</button>
       </div>`,
     );
   }
@@ -350,7 +343,7 @@ export function mountPos(container, opts) {
 
   // ---------- Một bộ bắt sự kiện cho cả màn hình (gán onclick để không bị gắn trùng) ----------
   container.onclick = async (e) => {
-    const b = e.target.closest('button');
+    const b = e.target.closest('button, [data-tile]');
     if (!b || b.disabled) return;
     const d = b.dataset;
     if (d.tile) {
@@ -358,18 +351,20 @@ export function mountPos(container, opts) {
       buzz();
       return refreshPick();
     }
-    if (d.plus) { addOne(st.cart, d.plus, priceOf(d.plus)); buzz(); return refreshPick(); }
-    if (d.minus) { removeOne(st.cart, d.minus); buzz(); return refreshPick(); }
-    if (d.qty) {
-      const row = rows.find((r) => r.product_id === d.qty);
-      const q = await openKeypad({ title: `Số lượng ${row.name}`, sub: `Tính theo ${row.unit}. Bấm 0 rồi Xong để bỏ khỏi đơn.`, mode: 'qty', value: st.cart.get(d.qty)?.qty });
-      if (q !== null) { setQty(st.cart, d.qty, q, row.price); refreshPick(); }
+    if (d.badge) {
+      const row = rows.find((r) => r.product_id === d.badge);
+      const q = await openKeypad({ title: `Số lượng ${row.name}`, sub: `Tính theo ${row.unit}. Bấm 0 rồi Xong để bỏ hàng này khỏi đơn.`, mode: 'qty', value: st.cart.get(d.badge)?.qty });
+      if (q !== null) { setQty(st.cart, d.badge, q, row.price); refreshPick(); }
       return;
     }
     if (d.price) {
       const row = rows.find((r) => r.product_id === d.price);
-      const p = await openKeypad({ title: `Giá ${row.name} cho đơn này`, sub: `Giá thường: ${formatVND(row.price)} mỗi ${row.unit}`, mode: 'money', value: st.cart.get(d.price)?.price });
-      if (p !== null) { setPrice(st.cart, d.price, p); refreshPick(); }
+      const p = await openKeypad({ title: `Giá ${row.name} cho đơn này`, sub: `Giá thường: ${formatVND(row.price)} mỗi ${row.unit}`, mode: 'money', value: st.cart.get(d.price)?.price ?? row.price });
+      if (p !== null) {
+        if (!st.cart.has(d.price)) addOne(st.cart, d.price, row.price); // sửa giá = bán hàng này, mặc định 1
+        setPrice(st.cart, d.price, p);
+        refreshPick();
+      }
       return;
     }
     if (d.pay) {
@@ -402,6 +397,15 @@ export function mountPos(container, opts) {
       case 'change-customer': return onChangeCustomer?.();
       default:
     }
+  };
+
+  // Bàn phím: Enter/Space trên ô hàng = bấm ô
+  container.onkeydown = (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tile = e.target.closest?.('[data-tile]');
+    if (!tile || e.target.closest('button')) return;
+    e.preventDefault();
+    tile.click();
   };
 
   render();
