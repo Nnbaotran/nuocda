@@ -33,8 +33,9 @@ export async function updateOrder({ orderId, items, paid, note, orderDate }) {
 
 export async function cancelOrder(orderId, reason) {
   const sb = await db();
-  const { error } = await sb.rpc('cancel_order', { p_order_id: orderId, p_reason: reason ?? '' });
+  const { data, error } = await sb.rpc('cancel_order', { p_order_id: orderId, p_reason: reason ?? '' });
   if (error) throwFriendly(error, 'Không huỷ được đơn');
+  return data; // { paid_in_order, payments_refund, payments_cancelled }
 }
 
 /** Xoá hẳn đơn ĐÃ HUỶ khỏi lịch sử (database chặn nếu đơn chưa huỷ). */

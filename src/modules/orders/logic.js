@@ -54,3 +54,13 @@ export const ORDER_STATUS = {
   active: { label: 'Hiệu lực', badge: 'badge-green' },
   cancelled: { label: 'Đã huỷ', badge: 'badge-gray' },
 };
+
+/** Thông báo sau khi huỷ đơn: tổng tiền phải trả lại khách (tiền trả lúc mua + phần phiếu thu bị huỷ theo). */
+export function cancelResultText(code, r) {
+  const inOrder = Number(r?.paid_in_order) || 0;
+  const fromPay = Number(r?.payments_refund) || 0;
+  const refund = inOrder + fromPay;
+  if (!refund) return `Đã huỷ đơn ${code}`;
+  return `Đã huỷ đơn ${code}. Trả lại khách ${formatVND(refund)}`
+    + (fromPay ? ` (gồm ${formatVND(fromPay)} từ phiếu thu đã huỷ theo)` : '');
+}

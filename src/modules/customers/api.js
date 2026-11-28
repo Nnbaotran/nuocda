@@ -1,7 +1,7 @@
 import { cached, invalidate, LIST_TTL } from '../../lib/cache.js';
 import { db, throwFriendly } from '../../lib/supabase.js';
 
-const COLUMNS = 'id, name, phone, address, note, is_active, created_at';
+const COLUMNS = 'id, name, phone, address, note, is_active, created_at, opening_debt, opening_debt_date';
 
 async function fetchListCustomersFresh() {
   const sb = await db();
@@ -28,9 +28,20 @@ export async function createCustomer(info, prices) {
     p_address: info.address,
     p_note: info.note,
     p_prices: prices,
+    p_opening_debt: info.openingDebt ?? 0,
+    p_opening_date: info.openingDate || null,
   });
   if (error) throwFriendly(error, 'Không tạo được hồ sơ khách');
   return data; // id khách mới
+}
+
+/** Sửa nợ cũ (nợ trước khi dùng app). Trả về công nợ hiện tại sau khi sửa. */
+export async function setOpeningDebt(id, amount, date) {
+  invalidate('customers');
+  const sb = await db();
+  const { data, error } = await sb.rpc('set_opening_debt', { p_customer_id: id, p_amount: amount, p_date: date || null });
+  if (error) throwFriendly(error, 'Không lưu được nợ cũ');
+  return data;
 }
 
 export async function updateCustomer(id, patch) {

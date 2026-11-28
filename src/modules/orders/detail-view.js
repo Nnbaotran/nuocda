@@ -7,7 +7,7 @@ import { buildPriceRows } from '../customers/logic.js';
 import { listProducts } from '../products/api.js';
 import { cancelOrder, deleteCancelledOrder, getOrder, updateOrder } from './api.js';
 import { mountPos } from './pos.js';
-import { ORDER_STATUS } from './logic.js';
+import { cancelResultText, ORDER_STATUS } from './logic.js';
 
 
 function describeLog(log) {
@@ -147,13 +147,14 @@ export function renderOrderDetail(root, { params }) {
   async function onCancel() {
     const reason = await promptReason({
       title: `Huỷ đơn ${order.code}`,
-      message: `Đơn ${formatVND(order.total)} sẽ bị loại khỏi doanh thu và công nợ. Không xoá, vẫn xem lại được.`,
+      message: `Đơn ${formatVND(order.total)} sẽ bị loại khỏi doanh thu và công nợ. Tiền khách đã trả cho đơn này cũng huỷ theo`
+        + `${order.paid ? ` (${formatVND(order.paid)} trả lúc mua)` : ''}; nếu khách đã trả nợ dư thì phiếu thu gần nhất cũng huỷ phần dư. Đơn vẫn xem lại được.`,
       confirmLabel: 'Huỷ đơn',
     });
     if (reason === null) return;
     try {
-      await cancelOrder(order.id, reason);
-      toast('Đã huỷ đơn');
+      const res = await cancelOrder(order.id, reason);
+      toast(cancelResultText(order.code, res));
       load();
     } catch (err) {
       toast(err.message, 'error');
