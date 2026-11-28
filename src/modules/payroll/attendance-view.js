@@ -132,7 +132,7 @@ export function renderAttendance(root) {
                 <button class="text-xs text-accent-ink hover:underline" data-detail="${e.id}">
                   ${r ? `${formatQty(r.units)} công${r.check_in ? ` · ${r.check_in.slice(0, 5)}–${r.check_out?.slice(0, 5) ?? ''}` : ''} ›` : 'Chi tiết ›'}</button>
               </div>
-              <div class="grid grid-cols-4 gap-1.5">
+              <div class="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
                 ${ATT_ORDER.map((k) => html`<button class="min-h-11 rounded-xl text-sm font-medium ring-1 transition disabled:opacity-50 ${r?.status === k ? ATT_STATUS[k].cls : 'bg-fg/[0.03] text-muted ring-fg/10 hover:text-fg'}"
                   data-set="${e.id}" data-status="${k}" aria-pressed="${r?.status === k ? 'true' : 'false'}" ${locked ? 'disabled' : ''}>${ATT_STATUS[k].label}</button>`)}
               </div>

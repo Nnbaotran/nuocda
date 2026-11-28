@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { basePay, computePay, daysInMonth, monthRange, shiftMonth, sumUnits, toCSV } from '../src/modules/payroll/logic.js';
+import { ATT_ORDER, ATT_STATUS, basePay, computePay, daysInMonth, monthRange, shiftMonth, sumUnits, toCSV } from '../src/modules/payroll/logic.js';
 
 test('daysInMonth: số ngày thực tế, kể cả năm nhuận', () => {
   assert.equal(daysInMonth('2026-02'), 28);
@@ -52,4 +52,10 @@ test('validateEmployee', () => {
   assert.equal(ok.value.name, 'An');
   const bad = validateEmployee({ name: '', salary_amount: '', phone: 'abc' }, parseMoney);
   assert.deepEqual(Object.keys(bad.errors).sort(), ['name', 'phone', 'salary_amount']);
+});
+
+test('nghỉ phép có lương = 1 công, không lương = 0 công', () => {
+  assert.equal(ATT_STATUS.leave_paid.units, 1);
+  assert.equal(ATT_STATUS.leave.units, 0);
+  assert.ok(ATT_ORDER.includes('leave_paid') && ATT_ORDER.includes('leave'));
 });

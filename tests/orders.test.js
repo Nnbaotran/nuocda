@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { addDays, formatDateStr, fromLocalInputVN, presetRange, rangeToTimestamps, todayVN, toLocalInputVN } from '../src/lib/dates.js';
-import { balanceLabel, buildLedger, lineTotal, parseQuantity } from '../src/modules/orders/logic.js';
+import { balanceLabel, buildLedger, cancelResultText, lineTotal, parseQuantity } from '../src/modules/orders/logic.js';
 
 test('parseQuantity: dấu phẩy hoặc chấm đều là số lẻ, tối đa 2 số lẻ', () => {
   assert.deepEqual(parseQuantity('10'), { value: 10 });
@@ -60,4 +60,23 @@ test('ngày theo giờ Việt Nam', () => {
   assert.equal(toLocalInputVN('2026-11-24T17:30:00Z'), '2026-11-25T00:30');
   assert.equal(fromLocalInputVN('2026-11-25T00:30'), '2026-11-25T00:30:00+07:00');
   assert.equal(fromLocalInputVN('sai'), null);
+});
+
+test('sổ công nợ: dòng nợ cũ cộng vào dư', () => {
+  const l = buildLedger(0, [
+    { kind: 'opening', increase: 100000, decrease: 0 },
+    { kind: 'order', increase: 50000, decrease: 0 },
+    { kind: 'payment', increase: 0, decrease: 120000 },
+  ]);
+  assert.equal(l.increase, 150000);
+  assert.equal(l.closing, 30000);
+  assert.deepEqual(l.rows.map((r) => r.balance), [100000, 150000, 30000]);
+});
+
+test('thông báo huỷ đơn: tiền trả lại khách', () => {
+  const n = (s) => s.replace(/\s/g, ' ');
+  assert.equal(cancelResultText('DH1', { paid_in_order: 0, payments_refund: 0 }), 'Đã huỷ đơn DH1');
+  assert.equal(n(cancelResultText('DH1', { paid_in_order: 50000, payments_refund: 0 })), n('Đã huỷ đơn DH1. Trả lại khách 50.000 ₫'));
+  assert.equal(n(cancelResultText('DH1', { paid_in_order: 10000, payments_refund: 20000 })),
+    n('Đã huỷ đơn DH1. Trả lại khách 30.000 ₫ (gồm 20.000 ₫ từ phiếu thu đã huỷ theo)'));
 });

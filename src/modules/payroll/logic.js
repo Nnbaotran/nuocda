@@ -5,9 +5,10 @@ export const ATT_STATUS = {
   present: { label: 'Đi làm', short: 'X', units: 1, cls: 'bg-emerald-500/15 text-good ring-emerald-500/40' },
   half: { label: 'Nửa ngày', short: '½', units: 0.5, cls: 'bg-sky-500/15 text-cool ring-sky-500/40' },
   absent: { label: 'Nghỉ', short: 'N', units: 0, cls: 'bg-rose-500/12 text-bad ring-rose-500/35' },
-  leave: { label: 'Nghỉ phép', short: 'P', units: 0, cls: 'bg-violet-500/15 text-info ring-violet-500/40' },
+  leave_paid: { label: 'Phép có lương', short: 'P', units: 1, cls: 'bg-violet-500/15 text-info ring-violet-500/40' },
+  leave: { label: 'Phép không lương', short: 'K', units: 0, cls: 'bg-amber-500/15 text-warn ring-amber-500/40' },
 };
-export const ATT_ORDER = ['present', 'half', 'absent', 'leave'];
+export const ATT_ORDER = ['present', 'half', 'absent', 'leave_paid', 'leave'];
 
 export const SALARY_TYPES = {
   monthly: { label: 'Lương tháng', unit: '/ tháng' },

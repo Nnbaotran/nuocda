@@ -7,6 +7,8 @@ import { mountRangeFilter } from '../../lib/range-filter.js';
 import { bindMoneyInputs, emptyState, statCard, errorState, icon, loadingState, moneyValue, openModal, promptReason, showFieldErrors, toast } from '../../lib/ui.js';
 import { cancelPayment, customerBalances, customerLedger, recordPayment } from '../orders/api.js';
 import { balanceLabel, buildLedger } from '../orders/logic.js';
+import { setOpeningDebt } from './api.js';
+import { openingDebtFields, readOpeningDebt } from './forms.js';
 
 const TONE = { debt: 'text-warn', credit: 'text-good', clear: 'text-good' };
 
@@ -23,12 +25,23 @@ export function renderDebtTab(panel, { customer }) {
           <p class="text-2xl font-bold tabular-nums" data-balance>…</p>
         </div>
         <button class="btn-primary" data-pay>${icon('wallet', 'size-4')} Khách trả nợ</button>
+        <div class="flex w-full items-center justify-between gap-2 border-t border-fg/10 pt-3 text-sm">
+          <span class="text-muted">Nợ cũ (trước khi dùng app): <strong class="text-fg tabular-nums" data-opening-amt></strong></span>
+          <button class="font-medium text-accent-ink hover:underline" data-edit-opening>Sửa nợ cũ</button>
+        </div>
       </div>
       <div data-range></div>
       <div data-ledger>${loadingState(3)}</div>
     </div>`,
   );
   const ledgerEl = $('[data-ledger]', panel);
+  const showOpening = () => {
+    const a = Number(customer.opening_debt) || 0;
+    $('[data-opening-amt]', panel).textContent = a
+      ? `${formatVND(a)}${customer.opening_debt_date ? ` (đến ${formatDateStr(customer.opening_debt_date)})` : ''}`
+      : 'Không có';
+  };
+  showOpening();
 
   async function loadBalance() {
     try {
@@ -69,7 +82,9 @@ export function renderDebtTab(panel, { customer }) {
                 (r) => html`<li class="flex items-start gap-3 px-4 py-3">
                   <div class="min-w-0 flex-1">
                     <p class="text-xs text-subtle">${formatDateStr(r.date)}</p>
-                    ${r.kind === 'order'
+                    ${r.kind === 'opening'
+                      ? html`<p class="font-medium text-fg">Nợ cũ</p><p class="text-xs text-subtle">Khách nợ từ trước khi dùng app</p>`
+                      : r.kind === 'order'
                       ? html`<p class="font-medium text-fg">Đơn <a class="text-accent-ink hover:underline" href="#/don-hang/${r.id}">${r.code}</a></p>
                           <p class="text-xs text-subtle">Tổng ${formatVND(r.total)} · đã trả ${formatVND(r.paid)}</p>`
                       : html`<p class="font-medium text-fg">Khách trả nợ</p>
@@ -150,6 +165,29 @@ export function renderDebtTab(panel, { customer }) {
     }
   }
 
+  function openEditOpening() {
+    const { el } = openModal({
+      title: 'Sửa nợ cũ',
+      submitLabel: 'Lưu',
+      body: html`<div class="space-y-3">
+        <p class="text-sm text-muted">${customer.name}. Nợ cũ là số khách còn nợ từ trước khi dùng app (không tính các đơn trong app).</p>
+        ${openingDebtFields(Number(customer.opening_debt) || 0, customer.opening_debt_date)}
+      </div>`,
+      onSubmit: async (form) => {
+        const { errors, amount, date } = readOpeningDebt(form);
+        showFieldErrors(form, errors);
+        if (Object.keys(errors).length) return false;
+        await setOpeningDebt(customer.id, amount, date);
+        customer.opening_debt = amount;
+        customer.opening_debt_date = date;
+        showOpening();
+        toast(amount ? `Đã lưu nợ cũ ${formatVND(amount)}` : 'Đã bỏ nợ cũ');
+        refreshAll();
+      },
+    });
+    bindMoneyInputs(el);
+  }
+
   function refreshAll() {
     loadBalance();
     loadLedger();
@@ -157,6 +195,7 @@ export function renderDebtTab(panel, { customer }) {
 
   panel.addEventListener('click', (e) => {
     if (e.target.closest('[data-pay]')) openPayment();
+    if (e.target.closest('[data-edit-opening]')) openEditOpening();
     const c = e.target.closest('[data-cancel-pay]');
     if (c) onCancelPayment(c.dataset.cancelPay, Number(c.dataset.amount));
   });
