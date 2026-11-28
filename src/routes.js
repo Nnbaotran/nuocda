@@ -17,15 +17,19 @@ const payroll = lazy(() => import('./modules/payroll/payroll-view.js'), 'renderP
 const employees = lazy(() => import('./modules/payroll/employees-view.js'), 'renderEmployees');
 const expenses = lazy(() => import('./modules/expenses/view.js'), 'renderExpenses');
 const reports = lazy(() => import('./modules/reports/view.js'), 'renderReports');
+const posPick = lazy(() => import('./modules/orders/pos-view.js'), 'renderPosPickCustomer');
+const posPage = lazy(() => import('./modules/orders/pos-view.js'), 'renderPosPage');
 
 const ROUTES = [
   { path: '/', label: 'Tổng quan', icon: 'home', roles: OWNER, render: renderHome, bottom: true },
+  { path: '/ban-hang', label: 'Bán hàng', icon: 'cart', roles: OWNER, render: posPick, bottom: true, primary: true },
+  { path: '/ban-hang/:id', label: 'Bán hàng', icon: 'cart', roles: OWNER, render: posPage, hidden: true, nav: '/ban-hang' },
   { path: '/khach-hang', label: 'Khách hàng', icon: 'users', roles: OWNER, render: customersList, bottom: true },
   { path: '/khach-hang/:id', label: 'Hồ sơ khách', icon: 'users', roles: OWNER, render: customerDetail, hidden: true, nav: '/khach-hang' },
   { path: '/khach-hang/:id/:tab', label: 'Hồ sơ khách', icon: 'users', roles: OWNER, render: customerDetail, hidden: true, nav: '/khach-hang' },
   { path: '/don-hang', label: 'Đơn hàng', icon: 'receipt', roles: OWNER, render: ordersList, bottom: true },
   { path: '/don-hang/:id', label: 'Chi tiết đơn', icon: 'receipt', roles: OWNER, render: orderDetail, hidden: true, nav: '/don-hang' },
-  { path: '/san-pham', label: 'Sản phẩm', icon: 'box', roles: OWNER, render: products, bottom: true },
+  { path: '/san-pham', label: 'Sản phẩm', icon: 'box', roles: OWNER, render: products },
   { path: '/cham-cong', label: 'Chấm công', icon: 'calendar', roles: OWNER, render: attendance },
   { path: '/luong', label: 'Bảng lương', icon: 'cash', roles: OWNER, render: payroll },
   { path: '/nhan-vien', label: 'Nhân viên', icon: 'id', roles: OWNER, render: employees },

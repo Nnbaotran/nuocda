@@ -16,7 +16,7 @@ export function renderOrders(root) {
     html`<section class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-muted">Đơn được lên từ thẻ "Bán hàng" trong hồ sơ khách.</p>
-        <button class="btn-primary" data-new>${icon('plus', 'size-4')} Lên đơn</button>
+        <a class="btn-success w-auto min-h-12 px-5 text-lg" href="#/ban-hang">${icon('cart', 'size-6')} Bán hàng</a>
       </div>
       <div data-range></div>
       <div class="grid grid-cols-2 gap-2">
@@ -99,32 +99,7 @@ export function renderOrders(root) {
     );
   }
 
-  function pickCustomer() {
-    const active = state.customers.filter((c) => c.is_active);
-    const { el, close } = openModal({
-      title: 'Lên đơn cho khách nào?',
-      body: html`<div class="space-y-3">
-        <input class="input" type="search" placeholder="Tìm tên, SĐT…" data-q aria-label="Tìm khách" />
-        <ul class="max-h-[50dvh] space-y-1 overflow-y-auto" data-opts></ul>
-      </div>`,
-    });
-    const opts = $('[data-opts]', el);
-    const paint = (q = '') => {
-      const list = active.filter((c) => matchCustomer(c, q));
-      setHtml(
-        opts,
-        list.length
-          ? html`${list.map((c) => html`<li><a class="nav-link" href="#/khach-hang/${c.id}/ban-hang">${c.name}<span class="ml-auto text-xs text-subtle">${c.phone}</span></a></li>`)}`
-          : html`<li class="px-3 py-6 text-center text-sm text-subtle">Không có khách phù hợp. Thêm khách ở mục Khách hàng.</li>`,
-      );
-    };
-    $('[data-q]', el).addEventListener('input', (e) => paint(e.target.value));
-    opts.addEventListener('click', (e) => e.target.closest('a') && close());
-    paint();
-  }
-
   section.addEventListener('click', (e) => {
-    if (e.target.closest('[data-new]')) return pickCustomer();
     const tr = e.target.closest('tr[data-href]');
     if (tr && !e.target.closest('a')) location.hash = tr.dataset.href;
   });

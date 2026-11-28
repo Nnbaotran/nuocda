@@ -6,8 +6,8 @@ import { getCustomerPrices } from '../customers/api.js';
 import { buildPriceRows } from '../customers/logic.js';
 import { listProducts } from '../products/api.js';
 import { cancelOrder, deleteCancelledOrder, getOrder, updateOrder } from './api.js';
-import { mountOrderEditor } from './editor.js';
-import { ORDER_STATUS, payModeOf } from './logic.js';
+import { mountPos } from './pos.js';
+import { ORDER_STATUS } from './logic.js';
 
 
 function describeLog(log) {
@@ -123,20 +123,20 @@ export function renderOrderDetail(root, { params }) {
       return toast(err.message, 'error');
     }
     const { el, close } = openModal({ title: `Sửa đơn ${order.code}`, wide: true, body: html`<div data-editor></div>` });
-    $('footer', el)?.remove(); // khung sửa có nút Lưu riêng
-    mountOrderEditor($('[data-editor]', el), {
+    $('footer', el)?.remove(); // màn hình bán hàng có nút Lưu riêng
+    mountPos($('[data-editor]', el), {
+      customer: { id: order.customer_id, name: order.customers?.name ?? '' },
       rows,
-      submitLabel: 'Lưu thay đổi',
+      mode: 'edit',
+      fixedBar: false,
       initial: {
-        qty: Object.fromEntries(order.items.map((i) => [i.product_id, formatQty(i.quantity)])),
-        prices: Object.fromEntries(order.items.map((i) => [i.product_id, Number(i.unit_price)])),
-        mode: payModeOf(order.total, order.paid),
+        items: order.items.map((i) => ({ product_id: i.product_id, quantity: i.quantity, unit_price: i.unit_price })),
         paid: order.paid,
         note: order.note,
         orderDate: order.order_date,
       },
-      onSubmit: async ({ items, paid, note, orderDate }) => {
-        await updateOrder({ orderId: order.id, items, paid, note, orderDate });
+      onSave: ({ items, paid, note, orderDate }) => updateOrder({ orderId: order.id, items, paid, note, orderDate }),
+      onDone: () => {
         toast('Đã lưu thay đổi của đơn');
         close();
         load();

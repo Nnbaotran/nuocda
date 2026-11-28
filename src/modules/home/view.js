@@ -4,7 +4,7 @@ import { currentProfile, displayName, ROLE_LABELS } from '../auth/session.js';
 
 export function renderHome(root, { routes }) {
   const p = currentProfile();
-  const shortcuts = routes.filter((r) => r.path !== '/');
+  const shortcuts = routes.filter((r) => r.path !== '/' && !r.primary);
   setHtml(
     root,
     html`<section class="space-y-5">
@@ -14,11 +14,12 @@ export function renderHome(root, { routes }) {
         <h2 class="text-2xl font-bold text-fg">${displayName()}</h2>
         <span class="badge-violet mt-2">${ROLE_LABELS[p?.role] ?? ''}</span>
       </div>
+      <a href="#/ban-hang" class="btn-success min-h-24 text-3xl">${icon('cart', 'size-10')} BÁN HÀNG</a>
       <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
         ${shortcuts.map(
           (r) => html`<a href="#${r.path}" class="card card-hover flex flex-col gap-3">
             <span class="grid size-10 place-items-center rounded-xl bg-fg/5 text-accent-ink">${icon(r.icon)}</span>
-            <span class="text-sm font-medium text-fg">${r.label}</span>
+            <span class="text-lg font-semibold text-fg">${r.label}</span>
           </a>`,
         )}
       </div>
