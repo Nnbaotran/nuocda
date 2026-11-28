@@ -14,7 +14,10 @@ function navLinks(routes) {
 
 export function renderShell(root, routes) {
   const p = currentProfile();
-  const bottom = routes.filter((r) => r.bottom);
+  // Thanh dưới: nút Bán hàng nổi bật ở giữa
+  const others = routes.filter((r) => r.bottom && !r.primary);
+  const primary = routes.find((r) => r.primary);
+  const bottom = primary ? [...others.slice(0, 2), primary, ...others.slice(2)] : others;
   setHtml(
     root,
     html`<div class="min-h-dvh md:pl-64">
@@ -47,7 +50,9 @@ export function renderShell(root, routes) {
       <main id="page" class="mx-auto max-w-5xl px-4 pt-4 pb-28 md:px-6 md:pt-6 md:pb-10"></main>
 
       <nav class="fixed inset-x-0 bottom-0 z-30 flex border-t border-fg/10 bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden" aria-label="Điều hướng nhanh">
-        ${bottom.map((r) => html`<a href="#${r.path}" class="bottom-link" data-path="${r.path}">${icon(r.icon, 'size-6')}<span>${r.label}</span></a>`)}
+        ${bottom.map((r) => r.primary
+          ? html`<a href="#${r.path}" class="bottom-link" data-path="${r.path}"><span class="-mt-6 grid size-14 place-items-center rounded-full bg-accent text-white shadow-lg shadow-accent/40 ring-4 ring-page">${icon(r.icon, 'size-7')}</span><span class="font-bold">${r.label}</span></a>`
+          : html`<a href="#${r.path}" class="bottom-link" data-path="${r.path}">${icon(r.icon, 'size-6')}<span>${r.label}</span></a>`)}
         <button class="bottom-link" data-open-menu>${icon('menu', 'size-6')}<span>Thêm</span></button>
       </nav>
 

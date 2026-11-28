@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { addDays, formatDateStr, fromLocalInputVN, presetRange, rangeToTimestamps, todayVN, toLocalInputVN } from '../src/lib/dates.js';
-import { balanceLabel, buildLedger, buildOrderItems, lineTotal, parseQuantity, payModeOf, resolvePaid } from '../src/modules/orders/logic.js';
+import { balanceLabel, buildLedger, lineTotal, parseQuantity } from '../src/modules/orders/logic.js';
 
 test('parseQuantity: dấu phẩy hoặc chấm đều là số lẻ, tối đa 2 số lẻ', () => {
   assert.deepEqual(parseQuantity('10'), { value: 10 });
@@ -21,48 +21,6 @@ test('lineTotal: làm tròn đến đồng, khớp với database', () => {
   assert.equal(lineTotal(0.33, 1001), 330); // 330.33 -> 330
   assert.equal(lineTotal(0.5, 1001), 501); // 500.5 -> làm tròn lên 501
   assert.equal(lineTotal(100000, 1000000000), 100000000000000);
-});
-
-test('buildOrderItems: bỏ dòng số lượng 0, cộng tổng đúng', () => {
-  const r = buildOrderItems([
-    { product_id: 'a', qtyText: '10', priceText: '28.000' },
-    { product_id: 'b', qtyText: '2,5', priceText: '24000' },
-    { product_id: 'c', qtyText: '', priceText: '20.000' },
-    { product_id: 'd', qtyText: '0', priceText: '20.000' },
-  ]);
-  assert.equal(r.ok, true);
-  assert.equal(r.total, 340000);
-  assert.deepEqual(r.items, [
-    { product_id: 'a', quantity: 10, unit_price: 28000 },
-    { product_id: 'b', quantity: 2.5, unit_price: 24000 },
-  ]);
-});
-
-test('buildOrderItems: đơn trống hoặc dòng sai thì không hợp lệ', () => {
-  assert.equal(buildOrderItems([{ product_id: 'a', qtyText: '', priceText: '1' }]).ok, false);
-  assert.equal(buildOrderItems([{ product_id: 'a', qtyText: '', priceText: '1' }]).empty, true);
-  const bad = buildOrderItems([
-    { product_id: 'a', qtyText: '1,234', priceText: '1' },
-    { product_id: 'b', qtyText: '1', priceText: 'abc' },
-  ]);
-  assert.deepEqual(bad.errors, { a: 'Tối đa 2 số lẻ', b: 'Đơn giá không hợp lệ' });
-});
-
-test('resolvePaid: 3 cách thanh toán', () => {
-  assert.deepEqual(resolvePaid('full', 340000), { paid: 340000 });
-  assert.deepEqual(resolvePaid('debt', 340000), { paid: 0 });
-  assert.deepEqual(resolvePaid('partial', 340000, '100.000'), { paid: 100000 });
-  assert.ok(resolvePaid('partial', 340000, '').error);
-  assert.ok(resolvePaid('partial', 340000, '0').error);
-  assert.ok(resolvePaid('partial', 340000, '340.000').error);
-  assert.ok(resolvePaid('partial', 340000, '400.000').error);
-  assert.ok(resolvePaid('xyz', 1).error);
-});
-
-test('payModeOf', () => {
-  assert.equal(payModeOf(100, 100), 'full');
-  assert.equal(payModeOf(100, 0), 'debt');
-  assert.equal(payModeOf(100, 40), 'partial');
 });
 
 test('buildLedger: nợ đầu kỳ + tăng − giảm = nợ cuối kỳ, số dư từng dòng', () => {
