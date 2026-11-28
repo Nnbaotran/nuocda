@@ -162,7 +162,11 @@
     @apply border-accent bg-accent/[0.06];
   }
   .pos-badge {
-    @apply absolute -top-3 -right-2 grid h-11 min-w-11 place-items-center rounded-full bg-accent px-2 text-xl font-black text-white shadow-lg ring-4 ring-page;
+    @apply absolute -top-3 -right-2 z-10 grid h-11 min-w-11 place-items-center rounded-full bg-accent px-2 text-xl font-black text-white shadow-lg ring-4 ring-page;
+  }
+  /* Cây bút sửa giá trên ô hàng */
+  .pos-pen {
+    @apply grid size-9 shrink-0 place-items-center rounded-lg text-accent-ink/70 transition hover:bg-accent/12 hover:text-accent-ink active:scale-90;
   }
   /* Nút − / + trong giỏ và phím số */
   .pos-step {
